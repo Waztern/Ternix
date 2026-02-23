@@ -2,142 +2,67 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>TerNix Online 3D</title>
-    <!-- Подключаем движок -->
-    <script src="https://unpkg.com"></script>
-    <script src="https://unpkg.com"></script>
+    <title>TerNix 3D Final</title>
     <style>
         body { margin: 0; overflow: hidden; background: #000; font-family: "Arial", sans-serif; }
-        canvas { display: block; }
-
-        /* ЭКРАН ВХОДА */
-        #login-scr { position: fixed; inset: 0; background: #0055ff; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
-        #login-scr input { padding: 15px; width: 300px; border: none; font-size: 20px; text-align: center; border-radius: 5px; margin-bottom: 20px; }
-        #login-scr button { padding: 15px 80px; background: #00aa00; color: white; border: none; font-weight: bold; cursor: pointer; font-size: 20px; border-radius: 5px; }
-
-        /* ИНТЕРФЕЙС ГЕЙМПЛЕЯ */
+        canvas { width: 100vw; height: 100vh; display: block; }
+        
+        /* ИНТЕРФЕЙС */
         header { position: absolute; top: 0; width: 100%; height: 45px; background: #0044ee; color: white; display: flex; align-items: center; padding: 0 20px; z-index: 500; border-bottom: 2px solid #002288; box-sizing: border-box; }
-        header button { background: #fff; border: 1px solid #000; cursor: pointer; font-weight: bold; margin-right: 15px; padding: 3px 12px; }
-
-        #stats-ui { position: absolute; top: 60px; right: 20px; background: rgba(0,0,0,0.6); padding: 10px; border: 2px solid #fff; z-index: 400; width: 180px; }
-        #hp-bar { width: 100%; height: 18px; background: #333; margin-top: 5px; }
-        #hp-fill { width: 100%; height: 100%; background: #ff0000; transition: 0.3s; }
-
-        #chat-bar { position: absolute; bottom: 0; width: 100%; background: #fff; border-top: 3px solid #333; padding: 15px; z-index: 600; box-sizing: border-box; display: flex; }
+        #health-ui { position: absolute; top: 55px; right: 15px; background: rgba(0,0,0,0.5); padding: 10px; border: 2px solid #fff; z-index: 400; width: 160px; }
+        #hp-fill { width: 100%; height: 15px; background: red; transition: 0.3s; }
+        #chat-bar { position: absolute; bottom: 0; width: 100%; background: #fff; border-top: 3px solid #333; padding: 15px; z-index: 600; box-sizing: border-box; }
         #chat-input { width: 100%; border: none; outline: none; font-size: 18px; }
-        #chat-log { position: absolute; top: 60px; left: 20px; color: white; text-shadow: 2px 2px 2px #000; z-index: 400; font-size: 16px; pointer-events: none; }
+        #chat-log { position: absolute; top: 55px; left: 15px; color: white; text-shadow: 2px 2px #000; z-index: 400; pointer-events: none; }
+        
+        #launcher { position: fixed; inset: 0; background: #0055ff; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
     </style>
 </head>
 <body>
 
-<div id="login-scr">
-    <h1 style="font-size: 60px; margin-bottom: 20px;">TerNix</h1>
-    <input type="text" id="username-input" placeholder="Enter @username">
-    <button onclick="enterGame()">PLAY</button>
+<div id="launcher">
+    <h1 style="font-size: 64px;">TerNix</h1>
+    <input type="text" id="nick" placeholder="@username" style="padding: 15px; width: 280px; border: none; font-size: 20px; text-align: center; border-radius: 5px; margin-bottom: 20px;">
+    <button onclick="start()" style="padding: 15px 100px; background: #00aa00; color: white; border: none; font-weight: bold; cursor: pointer; font-size: 20px; border-radius: 5px;">PLAY</button>
 </div>
 
-<header>
-    <b style="font-size: 22px; margin-right: 30px;">TerNix</b>
-    <button onclick="location.reload()">Home</button>
-    <button>Games</button>
-    <div style="margin-left:auto; font-weight: bold;">Hex: 100</div>
-</header>
-
+<header><b>TerNix 3D Alpha</b> <div style="margin-left:auto">Hex: 100</div></header>
 <div id="chat-log"></div>
-
-<div id="stats-ui">
-    <div style="color:white; font-size:12px; font-weight:bold;">HEALTH</div>
-    <div id="hp-bar"><div id="hp-fill"></div></div>
+<div id="health-ui">
+    <div style="color:white; font-size:10px; font-weight:bold; margin-bottom:5px;">HEALTH</div>
+    <div style="background:#333;"><div id="hp-fill"></div></div>
 </div>
+
+<canvas id="c"></canvas>
 
 <div id="chat-bar">
     <input type="text" id="chat-input" placeholder='Нажми "/" для чата...'>
 </div>
 
 <script>
-    let scene, camera, renderer, player, username = "@Guest", hp = 100;
-    let keys = {}, velocityY = 0, isJumping = false;
+    const canvas = document.getElementById('c');
+    const gl = canvas.getContext('webgl');
     const chatInput = document.getElementById('chat-input');
     const chatLog = document.getElementById('chat-log');
 
-    function enterGame() {
-        let val = document.getElementById('username-input').value;
-        if(val) username = val.startsWith('@') ? val : '@' + val;
-        document.getElementById('login-scr').style.display = 'none';
-        init3D();
+    let username = "@Player", hp = 100;
+    let px = 0, py = 0, pz = 0, pRot = 0, jumpY = 0, jumpV = 0;
+    let keys = {}, isMoving = false, walkCycle = 0;
+
+    function start() {
+        let n = document.getElementById('nick').value;
+        if(n) username = n.startsWith('@') ? n : '@'+n;
+        document.getElementById('launcher').style.display = 'none';
+        loop();
     }
 
-    function init3D() {
-        scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB);
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-        scene.add(new THREE.GridHelper(200, 50, 0x000000, 0x444444));
-
-        // DAMAGE PART (Красная зона)
-        const lava = new THREE.Mesh(new THREE.BoxGeometry(6, 0.2, 6), new THREE.MeshPhongMaterial({color: 0xff0000}));
-        lava.position.set(15, 0, -15);
-        scene.add(lava);
-
-        // ЗАГРУЗКА ТВОЕЙ МОДЕЛИ
-        const loader = new THREE.GLTFLoader();
-        loader.load('Ternix.Guy.glb', (gltf) => {
-            player = gltf.scene;
-            scene.add(player);
-        }, undefined, () => {
-            // Если модели нет в корне - создаем временного челика
-            player = new THREE.Group();
-            const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1.3, 0.6), new THREE.MeshPhongMaterial({color: 0x888888}));
-            player.add(body);
-            const head = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), new THREE.MeshPhongMaterial({color: 0xffdbac}));
-            head.position.y = 1.1;
-            player.add(head);
-            scene.add(player);
-        });
-
-        camera.position.set(0, 7, 12);
-
-        window.addEventListener('keydown', (e) => {
-            if(e.key === '/') { e.preventDefault(); chatInput.focus(); }
-            if(e.code === 'Space' && !isJumping) { velocityY = 0.25; isJumping = true; }
-            keys[e.code] = true;
-        });
-        window.addEventListener('keyup', (e) => keys[e.code] = false);
-
-        animate();
-    }
-
-    function animate() {
-        requestAnimationFrame(animate);
-        if(player && document.activeElement !== chatInput) {
-            // Ходьба
-            if(keys['KeyW']) player.translateZ(-0.2);
-            if(keys['KeyS']) player.translateZ(0.2);
-            if(keys['KeyA']) player.rotation.y += 0.06;
-            if(keys['KeyD']) player.rotation.y -= 0.06;
-
-            // Физика прыжка
-            player.position.y += velocityY;
-            if(player.position.y > 0) velocityY -= 0.012;
-            else { player.position.y = 0; velocityY = 0; isJumping = false; }
-
-            // Зона урона
-            if(Math.abs(player.position.x - 15) < 3 && Math.abs(player.position.z + 15) < 3) {
-                hp -= 0.5; if(hp < 0) hp = 0;
-                document.getElementById('hp-fill').style.width = hp + "%";
-            }
-
-            // Камера
-            const camOffset = new THREE.Vector3(0, 7, 12).applyQuaternion(player.quaternion);
-            camera.position.lerp(player.position.clone().add(camOffset), 0.1);
-            camera.lookAt(player.position);
-        }
-        renderer.render(scene, camera);
-    }
+    // --- ФИЗИКА И УПРАВЛЕНИЕ ---
+    window.onkeydown = (e) => {
+        if(e.key === '/') { e.preventDefault(); chatInput.focus(); }
+        if(e.code === 'Space' && jumpY === 0) jumpV = 0.2;
+        keys[e.code] = true;
+    };
+    window.onkeyup = (e) => keys[e.code] = false;
 
     chatInput.onkeypress = (e) => {
         if(e.key === 'Enter' && chatInput.value !== "") {
@@ -145,6 +70,77 @@
             chatInput.value = ""; chatInput.blur();
         }
     };
+
+    // --- 3D РЕНДЕРЕР (БЕЗ ВНЕШНИХ БИБЛИОТЕК) ---
+    function loop() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const ctx = canvas.getContext('2d'); // Используем 2D контекст как обертку для 3D трансформаций
+
+        // Небо и земля
+        ctx.fillStyle = '#87CEEB'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#448844'; ctx.fillRect(0, canvas.height / 2, canvas.width, canvas.height / 2);
+
+        // Математика камеры
+        if(document.activeElement !== chatInput) {
+            isMoving = false;
+            if(keys['KeyW']) { px -= Math.sin(pRot) * 0.15; pz -= Math.cos(pRot) * 0.15; isMoving = true; }
+            if(keys['KeyS']) { px += Math.sin(pRot) * 0.15; pz += Math.cos(pRot) * 0.15; isMoving = true; }
+            if(keys['KeyA']) pRot += 0.05;
+            if(keys['KeyD']) pRot -= 0.05;
+            if(isMoving) walkCycle += 0.2;
+        }
+
+        // Прыжок
+        jumpY += jumpV;
+        if(jumpY > 0) jumpV -= 0.01; else { jumpY = 0; jumpV = 0; }
+
+        // Отрисовка "Сетки" (3D эффект)
+        ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+        for(let i = -10; i < 10; i++) {
+            let z = (i * 10) - (pz * 10 % 10);
+            let y = canvas.height/2 + (200 / (z/10 + 5));
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+        }
+
+        // РИСУЕМ ПЕРСОНАЖА (С руками и ногами)
+        let cx = canvas.width / 2;
+        let cy = canvas.height / 2 + 100 - (jumpY * 200);
+        let bob = Math.sin(walkCycle) * 10;
+
+        // Ноги
+        ctx.fillStyle = '#333';
+        ctx.fillRect(cx - 15, cy + (isMoving?bob:-bob), 12, 20);
+        ctx.fillRect(cx + 3, cy + (isMoving?-bob:bob), 12, 20);
+
+        // Туловище (Твой Ternix Guy)
+        ctx.fillStyle = '#888';
+        ctx.fillRect(cx - 20, cy - 40, 40, 50);
+        ctx.strokeRect(cx - 20, cy - 40, 40, 50);
+
+        // Руки
+        ctx.fillRect(cx - 32, cy - 40 + (isMoving?-bob:bob), 10, 30);
+        ctx.fillRect(cx + 22, cy - 40 + (isMoving?bob:-bob), 10, 30);
+
+        // Голова
+        ctx.fillStyle = '#ffdbac';
+        ctx.fillRect(cx - 15, cy - 70, 30, 30);
+        ctx.strokeRect(cx - 15, cy - 70, 30, 30);
+
+        // Никнейм
+        ctx.fillStyle = 'white'; ctx.textAlign = 'center'; ctx.font = "bold 16px Arial";
+        ctx.fillText(username, cx, cy - 80);
+
+        // БЛОК УРОНА (КРАСНЫЙ)
+        let lx = cx + (15 - px) * 20;
+        let lz = cy + (15 - pz) * 20;
+        if(Math.abs(px - 5) < 2 && Math.abs(pz - 5) < 2) {
+            hp -= 0.5; if(hp < 0) hp = 0;
+            document.getElementById('hp-fill').style.width = hp + "%";
+        }
+
+        requestAnimationFrame(loop);
+    }
 </script>
 </body>
 </html>
