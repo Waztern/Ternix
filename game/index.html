@@ -2,119 +2,129 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>TerNix 3D - Game</title>
-    <!-- Подключаем библиотеки напрямую через проверенный сервис -->
+    <title>TerNix 3D - Online</title>
     <script src="https://unpkg.com"></script>
     <script src="https://unpkg.com"></script>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; }
-        canvas { display: block; }
-        #ui { position: absolute; top: 10px; left: 10px; color: white; font-family: sans-serif; pointer-events: none; }
-        #chat-wrap { position: absolute; bottom: 0; width: 100%; background: #fff; padding: 10px; display: flex; border-top: 3px solid #333; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: Arial, sans-serif; }
+        /* ЭКРАН РЕГИСТРАЦИИ */
+        #login-scr { position: fixed; inset: 0; background: #0055ff; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        #login-scr input { padding: 12px; width: 250px; border: none; font-size: 18px; margin-bottom: 10px; text-align: center; }
+
+        header { position: absolute; top: 0; width: 100%; height: 40px; background: #0044ee; color: white; display: flex; align-items: center; padding: 0 15px; z-index: 500; border-bottom: 2px solid #002288; box-sizing: border-box; }
+        header button { background: #fff; border: 1px solid #000; cursor: pointer; font-weight: bold; margin-right: 10px; }
+
+        #chat-bar { position: absolute; bottom: 0; width: 100%; background: #fff; border-top: 3px solid #333; padding: 12px; z-index: 600; box-sizing: border-box; display: flex; }
         #chat-input { width: 100%; border: none; outline: none; font-size: 18px; }
-        #hp-ui { position: absolute; top: 10px; right: 10px; width: 150px; height: 20px; background: #333; border: 2px solid #fff; }
-        #hp-bar { width: 100%; height: 100%; background: red; }
+
+        #health-ui { position: absolute; top: 50px; right: 20px; background: rgba(0,0,0,0.5); padding: 8px; border: 2px solid #fff; z-index: 400; width: 150px; }
+        #hp-fill { width: 100%; height: 15px; background: red; transition: 0.3s; }
     </style>
 </head>
 <body>
 
-<div id="ui"><b>TerNix 3D Engine</b><br>@username</div>
-<div id="hp-ui"><div id="hp-bar"></div></div>
+<div id="login-scr">
+    <h1>TerNix</h1>
+    <input type="text" id="nick" placeholder="@username">
+    <button onclick="start()" style="padding: 10px 50px; cursor: pointer; background: #00aa00; color: white; border: none; font-weight: bold;">PLAY</button>
+</div>
 
-<div id="chat-wrap">
+<header>
+    <b>TerNix 3D</b>
+    <button onclick="location.reload()">Home</button>
+    <button>Games</button>
+    <div style="margin-left:auto">Hex: 100</div>
+</header>
+
+<div id="health-ui">
+    <div style="color:white; font-size:10px; font-weight:bold; margin-bottom:3px;">HEALTH</div>
+    <div style="background:#333;"><div id="hp-fill"></div></div>
+</div>
+
+<div id="chat-bar">
     <input type="text" id="chat-input" placeholder='Нажми "/" для чата...'>
 </div>
 
 <script>
-    let scene, camera, renderer, player, clock, mixer;
-    let keys = {};
+    let scene, camera, renderer, player, username = "@Guest", hp = 100;
+    let keys = {}, velocityY = 0, isJumping = false;
     const chatInput = document.getElementById('chat-input');
 
-    function init() {
+    function start() {
+        let n = document.getElementById('nick').value;
+        if(n) username = n.startsWith('@') ? n : '@'+n;
+        document.getElementById('login-scr').style.display = 'none';
+        init3D();
+    }
+
+    function init3D() {
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB);
-        clock = new THREE.Clock();
-
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
         renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
         scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
-        dirLight.position.set(5, 10, 7);
-        scene.add(dirLight);
+        scene.add(new THREE.GridHelper(100, 50));
 
-        // Пол
-        const grid = new THREE.GridHelper(100, 50);
-        scene.add(grid);
-
-        // Блок урона
-        const lavaGeo = new THREE.BoxGeometry(4, 0.2, 4);
-        const lavaMat = new THREE.MeshPhongMaterial({ color: 0xff0000 });
-        const lava = new THREE.Mesh(lavaGeo, lavaMat);
-        lava.position.set(5, 0, 5);
+        // DAMAGE BLOCK
+        const lava = new THREE.Mesh(new THREE.BoxGeometry(5, 0.2, 5), new THREE.MeshPhongMaterial({color: 0xff0000}));
+        lava.position.set(10, 0, -10);
         scene.add(lava);
 
         // ЗАГРУЗКА ТВОЕЙ МОДЕЛИ
         const loader = new THREE.GLTFLoader();
-        // Путь к модели в той же папке
         loader.load('Ternix.Guy.glb', (gltf) => {
             player = gltf.scene;
             scene.add(player);
-            // Если есть анимации в Blender
-            if (gltf.animations.length) {
-                mixer = new THREE.AnimationMixer(player);
-                mixer.clipAction(gltf.animations[0]).play();
-            }
-        }, undefined, (err) => {
-            console.error("Модель не найдена. Создаю временного челика.");
-            player = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1), new THREE.MeshPhongMaterial({color: 0x888888}));
-            player.position.y = 1;
+        }, undefined, () => {
+            // Если модели нет, создаем челика с руками и ногами
+            player = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1.2, 0.6), new THREE.MeshPhongMaterial({color: 0x888888}));
+            player.add(body);
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.7), new THREE.MeshPhongMaterial({color: 0xffdbac}));
+            head.position.y = 1;
+            player.add(head);
             scene.add(player);
         });
 
         camera.position.set(0, 5, 10);
         
         window.addEventListener('keydown', (e) => {
-            if (e.key === '/') { e.preventDefault(); chatInput.focus(); }
+            if(e.key === '/') { e.preventDefault(); chatInput.focus(); }
+            if(e.code === 'Space' && !isJumping) { velocityY = 0.2; isJumping = true; }
             keys[e.code] = true;
         });
         window.addEventListener('keyup', (e) => keys[e.code] = false);
-
         animate();
     }
 
     function animate() {
         requestAnimationFrame(animate);
-        const delta = clock.getDelta();
-        if (mixer) mixer.update(delta);
+        if(player && document.activeElement !== chatInput) {
+            if(keys['KeyW']) player.translateZ(-0.15);
+            if(keys['KeyS']) player.translateZ(0.15);
+            if(keys['KeyA']) player.rotation.y += 0.05;
+            if(keys['KeyD']) player.rotation.y -= 0.05;
 
-        if (player && document.activeElement !== chatInput) {
-            if (keys['KeyW']) player.translateZ(-0.15);
-            if (keys['KeyS']) player.translateZ(0.15);
-            if (keys['KeyA']) player.rotation.y += 0.05;
-            if (keys['KeyD']) player.rotation.y -= 0.05;
-            
-            // Прыжок (простой)
-            if (keys['Space'] && player.position.y <= 1.1) player.position.y += 0.5;
-            if (player.position.y > 1) player.position.y -= 0.05;
+            // Прыжок
+            player.position.y += velocityY;
+            if(player.position.y > 0) velocityY -= 0.01;
+            else { player.position.y = 0; velocityY = 0; isJumping = false; }
 
-            // Камера за игроком
-            const relativeCameraOffset = new THREE.Vector3(0, 5, 10);
-            const cameraOffset = relativeCameraOffset.applyMatrix4(player.matrixWorld);
-            camera.position.lerp(cameraOffset, 0.1);
+            // Урон
+            if(Math.abs(player.position.x - 10) < 2.5 && Math.abs(player.position.z + 10) < 2.5) {
+                hp -= 0.5; if(hp < 0) hp = 0;
+                document.getElementById('hp-fill').style.width = hp + "%";
+            }
+
+            camera.position.lerp(player.position.clone().add(new THREE.Vector3(0, 5, 10).applyQuaternion(player.quaternion)), 0.1);
             camera.lookAt(player.position);
         }
-
         renderer.render(scene, camera);
     }
-
-    chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') chatInput.blur();
-    });
-
-    init();
+    chatInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') chatInput.blur(); });
 </script>
 </body>
 </html>
