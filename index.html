@@ -1,197 +1,153 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TerNix Alpha</title>
+    <title>TerNix 3D - Alpha</title>
+    <!-- Используем надежный CDN для 3D движка -->
+    <script src="https://cdnjs.cloudflare.com"></script>
+    <script src="https://cdn.jsdelivr.net"></script>
     <style>
-        body { margin: 0; overflow: hidden; background: #0055ff; font-family: "Arial", sans-serif; }
-        canvas { display: block; width: 100vw; height: 100vh; background: #87CEEB; }
-
-        /* ВЕРХНЯЯ ПАНЕЛЬ */
-        header { position: absolute; top: 0; left: 0; width: 100%; height: 40px; background: #0044ee; color: white; display: flex; align-items: center; padding: 0 15px; box-sizing: border-box; z-index: 500; border-bottom: 2px solid #002288; }
-        header button { background: #fff; border: 1px solid #000; margin-right: 10px; cursor: pointer; font-weight: bold; padding: 2px 8px; font-size: 12px; }
-
-        /* ЧАТ ЛОГ (СЛЕВА СВЕРХУ) */
-        #chat-log { position: absolute; top: 50px; left: 15px; width: 300px; height: 150px; color: white; text-shadow: 1px 1px 2px #000; pointer-events: none; z-index: 400; overflow: hidden; font-size: 14px; }
-
-        /* ЗДОРОВЬЕ (СПРАВА СВЕРХУ) */
-        #health-ui { position: absolute; top: 50px; right: 15px; background: rgba(255,255,255,0.9); border: 2px solid #000; padding: 8px; width: 150px; z-index: 400; }
-        .hp-bar { width: 100%; height: 15px; background: #555; border: 1px solid #000; }
-        #hp-fill { width: 100%; height: 100%; background: #ff0000; transition: 0.2s; }
-
-        /* ЧАТ БАР (СНИЗУ) */
-        #chat-bar { position: absolute; bottom: 0; left: 0; width: 100%; background: #fff; border-top: 3px solid #333; display: flex; z-index: 600; padding: 10px; box-sizing: border-box; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: Arial, sans-serif; }
+        header { position: absolute; top: 0; width: 100%; height: 40px; background: #0044ee; color: white; display: flex; align-items: center; padding: 0 15px; z-index: 100; border-bottom: 2px solid #002288; box-sizing: border-box; }
+        header button { background: #fff; border: 1px solid #000; cursor: pointer; font-weight: bold; margin-right: 10px; }
+        
+        #chat-bar { position: absolute; bottom: 0; width: 100%; background: #fff; border-top: 3px solid #333; padding: 10px; z-index: 200; box-sizing: border-box; }
         #chat-input { width: 100%; border: none; outline: none; font-size: 18px; }
-
-        /* ОКНА */
-        .win { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #eee; border: 2px solid #333; width: 450px; display: none; z-index: 700; box-shadow: 8px 8px 0 rgba(0,0,0,0.2); }
-        .win-header { background: #0044ee; color: white; padding: 6px 12px; font-weight: bold; display: flex; justify-content: space-between; }
-        .win-content { padding: 20px; }
-
-        #launcher { position: fixed; inset: 0; background: #0055ff; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        
+        #health-ui { position: absolute; top: 50px; right: 20px; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 5px; z-index: 100; }
+        #hp-bar { width: 150px; height: 15px; background: #333; border: 2px solid #fff; }
+        #hp-fill { width: 100%; height: 100%; background: #ff0000; transition: 0.3s; }
     </style>
 </head>
 <body>
 
-<div id="launcher">
-    <h1 style="font-size: 48px; margin-bottom: 10px;">TerNix</h1>
-    <input type="text" id="username-in" placeholder="Enter @username..." style="padding: 12px; width: 250px; font-size: 18px; border: none; text-align: center;">
-    <button onclick="play()" style="margin-top:20px; padding: 12px 60px; cursor: pointer; background: #00aa00; color: white; border: none; font-weight: bold; font-size: 20px;">JOIN</button>
-</div>
-
 <header>
-    <b style="margin-right:20px;">TerNix</b>
-    <button onclick="toggle('home-win')">Home</button>
-    <button onclick="toggle('games-win')">Games</button>
-    <button onclick="toggle('avatar-win')">Avatar</button>
-    <div style="margin-left:auto; font-size:12px; font-weight:bold;">Fierens: 50 | Hex: 100</div>
+    <b>TerNix 3D</b>
+    <button onclick="location.reload()">Home</button>
+    <button>Games</button>
+    <div style="margin-left:auto">Fierens: 50</div>
 </header>
 
-<div id="chat-log"></div>
 <div id="health-ui">
-    <div style="font-size:10px; font-weight:bold; margin-bottom:3px;">HEALTH</div>
-    <div class="hp-bar"><div id="hp-fill"></div></div>
+    <div id="hp-bar"><div id="hp-fill"></div></div>
 </div>
-
-<div id="home-win" class="win">
-    <div class="win-header">Home <span onclick="toggle('home-win')" style="cursor:pointer">X</span></div>
-    <div class="win-content">
-        <h2 id="h-name">@User</h2>
-        <p>Status: Online in TerNix</p>
-        <hr>
-        <p>Welcome to the 2026 Alpha build.</p>
-    </div>
-</div>
-
-<div id="games-win" class="win">
-    <div class="win-header">Games <span onclick="toggle('games-win')" style="cursor:pointer">X</span></div>
-    <div class="win-content">
-        <div style="background:#fff; border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-            <b>The Crossroads (3D)</b><br><button onclick="toggle('games-win')">Play</button>
-        </div>
-        <div style="background:#ddd; border:1px solid #ccc; padding:10px; color:#888;">
-            <b>Chaos Canyon</b> (Coming Soon)
-        </div>
-    </div>
-</div>
-
-<div id="avatar-win" class="win">
-    <div class="win-header">Avatar Editor <span onclick="toggle('avatar-win')" style="cursor:pointer">X</span></div>
-    <div class="win-content">
-        <p>Body Color:</p>
-        <button onclick="pCol='#888'">Gray</button>
-        <button onclick="pCol='#ff0000'">Red</button>
-        <button onclick="pCol='#0000ff'">Blue</button>
-    </div>
-</div>
-
-<canvas id="game"></canvas>
 
 <div id="chat-bar">
-    <span style="font-weight:bold; margin-right:10px;">&gt;</span>
-    <input type="text" id="chat-input" placeholder='Click "/" to chat'>
+    <input type="text" id="chat-input" placeholder='Press "/" to chat'>
 </div>
 
 <script>
-    const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
-    const chatIn = document.getElementById('chat-input');
-    const chatLog = document.getElementById('chat-log');
+    let scene, camera, renderer, player, mixer;
+    let moveForward = false, moveBackward = false, moveLeft = false, moveRight = false;
+    let canJump = true, velocityY = 0;
 
-    let w, h, pX, pY, pCol = "#888", uName = "@Guest", hp = 100;
-    let walkCycle = 0, isMoving = false, jumpY = 0, jumpV = 0;
-    const keys = {};
+    const chatInput = document.getElementById('chat-input');
 
-    function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; pX = w/2; pY = h/2 + 100; }
-    window.onresize = resize; resize();
+    function init() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
 
-    function play() {
-        let n = document.getElementById('username-in').value;
-        if(n) { uName = n.startsWith('@') ? n : '@' + n; document.getElementById('h-name').innerText = uName; }
-        document.getElementById('launcher').style.display = 'none';
-        requestAnimationFrame(draw);
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
+        scene.add(light);
+
+        // Ground
+        const grid = new THREE.GridHelper(200, 50, 0x000000, 0x555555);
+        scene.add(grid);
+
+        // DAMAGE BLOCK (Красный блок)
+        const lavaGeo = new THREE.BoxGeometry(5, 0.5, 5);
+        const lavaMat = new THREE.MeshPhongMaterial({ color: 0xff0000 });
+        const lava = new THREE.Mesh(lavaGeo, lavaMat);
+        lava.position.set(10, 0, -10);
+        scene.add(lava);
+
+        // ЗАГРУЗКА МОДЕЛИ ИЗ BLENDER
+        const loader = new THREE.GLTFLoader();
+        // Убедись, что файл Ternix.Guy.glb лежит в той же папке на GitHub!
+        loader.load('Ternix.Guy.glb', function(gltf) {
+            player = gltf.scene;
+            player.scale.set(1, 1, 1);
+            scene.add(player);
+            
+            // Если в Blender есть анимации:
+            if(gltf.animations.length > 0) {
+                mixer = new THREE.AnimationMixer(player);
+                mixer.clipAction(gltf.animations[0]).play();
+            }
+        }, undefined, function(error) {
+            console.error("Model not found, using fallback cube.");
+            // Если модель не найдена, создаем временного кубического челика
+            player = new THREE.Group();
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1.5, 0.5), new THREE.MeshPhongMaterial({color: 0x888888}));
+            player.add(body);
+            scene.add(player);
+        });
+
+        camera.position.set(0, 5, 10);
+        animate();
     }
 
-    window.onkeydown = (e) => {
-        if(e.key === '/') { e.preventDefault(); chatIn.focus(); }
-        if(e.code === 'Space' && jumpY === 0) jumpV = 12;
-        keys[e.code] = true;
-    }
-    window.onkeyup = (e) => keys[e.code] = false;
-
-    chatIn.onkeypress = (e) => {
-        if(e.key === 'Enter' && chatIn.value !== "") {
-            chatLog.innerHTML += `<div><b>${uName}:</b> ${chatIn.value}</div>`;
-            chatIn.value = ""; chatLog.scrollTop = chatLog.scrollHeight; chatIn.blur();
-        }
-    }
-
-    function drawChar(x, y, name, color, cycle, jY) {
-        let bob = Math.sin(cycle) * 5;
-        // Shadow
-        ctx.fillStyle = "rgba(0,0,0,0.15)";
-        ctx.beginPath(); ctx.ellipse(x, y+10, 25, 12, 0, 0, Math.PI*2); ctx.fill();
+    // Controls
+    window.addEventListener('keydown', (e) => {
+        if(e.key === '/') { e.preventDefault(); chatInput.focus(); }
+        if(document.activeElement === chatInput) return;
         
-        let cy = y - jY;
-        // Legs
-        ctx.fillStyle = "#333";
-        ctx.fillRect(x-12, cy+5 + (isMoving?bob:-bob), 10, 15); // L
-        ctx.fillRect(x+2, cy+5 + (isMoving?-bob:bob), 10, 15);  // R
-        // Torso
-        ctx.fillStyle = color;
-        ctx.fillRect(x-18, cy-35, 36, 45); ctx.strokeRect(x-18, cy-35, 36, 45);
-        // Arms
-        ctx.fillStyle = color;
-        ctx.fillRect(x-28, cy-35 + (isMoving?-bob:bob), 10, 30); // L
-        ctx.fillRect(x+18, cy-35 + (isMoving?bob:-bob), 10, 30);  // R
-        // Head
-        ctx.fillStyle = "#ffdbac";
-        ctx.fillRect(x-12, cy-60, 24, 25); ctx.strokeRect(x-12, cy-60, 24, 25);
-        // Name
-        ctx.fillStyle = "white"; ctx.font = "bold 14px Arial"; ctx.textAlign = "center";
-        ctx.fillText(name, x, cy-70);
-    }
+        switch(e.code) {
+            case 'KeyW': moveForward = true; break;
+            case 'KeyS': moveBackward = true; break;
+            case 'KeyA': moveLeft = true; break;
+            case 'KeyD': moveRight = true; break;
+            case 'Space': if(canJump) { velocityY = 0.15; canJump = false; } break;
+        }
+    });
 
-    function draw() {
-        ctx.fillStyle = '#87CEEB'; ctx.fillRect(0,0,w,h); // Sky
-        ctx.fillStyle = '#448844'; ctx.fillRect(0, h/2, w, h/2); // Ground
+    window.addEventListener('keyup', (e) => {
+        switch(e.code) {
+            case 'KeyW': moveForward = false; break;
+            case 'KeyS': moveBackward = false; break;
+            case 'KeyA': moveLeft = false; break;
+            case 'KeyD': moveRight = false; break;
+        }
+    });
 
-        // DAMAGE BLOCK
-        ctx.fillStyle = "red"; ctx.fillRect(w/2 - 100, h/2 + 50, 60, 40);
-        ctx.strokeStyle = "black"; ctx.strokeRect(w/2 - 100, h/2 + 50, 60, 40);
+    function animate() {
+        requestAnimationFrame(animate);
 
-        if(document.activeElement !== chatIn) {
-            isMoving = false;
-            if(keys['KeyW'] && pY > h/2) { pY -= 4; isMoving = true; }
-            if(keys['KeyS'] && pY < h-60) { pY += 4; isMoving = true; }
-            if(keys['KeyA'] && pX > 30) { pX -= 4; isMoving = true; }
-            if(keys['KeyD'] && pX < w-30) { pX += 4; isMoving = true; }
-            if(isMoving) walkCycle += 0.2;
+        if(player) {
+            if(moveForward) player.translateZ(-0.1);
+            if(moveBackward) player.translateZ(0.1);
+            if(moveLeft) player.rotation.y += 0.05;
+            if(moveRight) player.rotation.y -= 0.05;
+
+            // Прыжок и гравитация
+            player.position.y += velocityY;
+            if(player.position.y > 0) {
+                velocityY -= 0.008;
+            } else {
+                player.position.y = 0;
+                velocityY = 0;
+                canJump = true;
+            }
+
+            // Камера следит за игроком
+            const offset = new THREE.Vector3(0, 5, 10).applyQuaternion(player.quaternion);
+            camera.position.copy(player.position).add(offset);
+            camera.lookAt(player.position);
         }
 
-        // Jump Physics
-        jumpY += jumpV;
-        if(jumpY > 0) jumpV -= 0.8; else { jumpY = 0; jumpV = 0; }
-
-        // Damage Check
-        if(pX > w/2-100 && pX < w/2-40 && pY > h/2+50 && pY < h/2+90) {
-            hp -= 0.5; if(hp < 0) hp = 0;
-            document.getElementById('hp-fill').style.width = hp + "%";
-        }
-
-        // Draw Test Bot
-        drawChar(w/2 + 150, h/2 + 80, "@BuildBot", "#555", 0, 0);
-
-        // Draw Player
-        drawChar(pX, pY, uName, pCol, walkCycle, jumpY);
-
-        requestAnimationFrame(draw);
+        renderer.render(scene, camera);
     }
 
-    function toggle(id) {
-        let e = document.getElementById(id);
-        e.style.display = (e.style.display === 'block') ? 'none' : 'block';
-    }
+    chatInput.addEventListener('keypress', (e) => {
+        if(e.key === 'Enter') { chatInput.blur(); }
+    });
+
+    init();
 </script>
 </body>
 </html>
