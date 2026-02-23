@@ -2,23 +2,15 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>TerNix 3D - Final Alpha</title>
-    <!-- Пытаемся загрузить движок через надежный шлюз -->
-    <script async src="https://ga.jspm.io"></script>
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://unpkg.com",
-            "three/examples/jsm/loaders/GLTFLoader": "https://unpkg.com"
-        }
-    }
-    </script>
+    <title>TerNix 3D Alpha</title>
+    <!-- Используем классическое подключение, которое не блокируется как модуль -->
+    <script src="https://cdnjs.cloudflare.com"></script>
+    <script src="https://cdn.jsdelivr.net"></script>
     <style>
         body { margin: 0; overflow: hidden; background: #0055ff; font-family: "Arial", sans-serif; }
         #login { position: fixed; inset: 0; background: #0055ff; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
         #login input { padding: 15px; width: 280px; border: none; font-size: 20px; text-align: center; margin-bottom: 20px; border-radius: 5px; }
         #play-btn { padding: 15px 100px; background: #00aa00; color: white; border: none; font-weight: bold; cursor: pointer; font-size: 20px; border-radius: 5px; }
-        #play-btn:disabled { background: #555; cursor: wait; }
         
         header { position: absolute; top: 0; width: 100%; height: 45px; background: #0044ee; color: white; display: flex; align-items: center; padding: 0 20px; z-index: 500; border-bottom: 2px solid #002288; box-sizing: border-box; }
         #chat-bar { position: absolute; bottom: 0; width: 100%; background: #fff; border-top: 3px solid #333; padding: 15px; z-index: 600; box-sizing: border-box; }
@@ -33,7 +25,7 @@
 <div id="login">
     <h1 style="font-size: 60px;">TerNix</h1>
     <input type="text" id="nick" placeholder="@username">
-    <button id="play-btn" disabled>LOADING ENGINE...</button>
+    <button id="play-btn" onclick="play()">PLAY</button>
 </div>
 
 <header><b>TerNix 3D Alpha</b> <div style="margin-left:auto">Hex: 100</div></header>
@@ -45,20 +37,24 @@
 
 <div id="chat-bar"><input type="text" id="chat-input" placeholder='Нажми "/" для чата...'></div>
 
-<script type="module">
-    import * as THREE from 'three';
-    import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+<script>
+    // Проверка наличия библиотеки перед запуском
+    function checkThree() {
+        if (typeof THREE === 'undefined') {
+            console.error("THREE is not loaded yet. Retrying...");
+            return false;
+        }
+        return true;
+    }
 
     let scene, camera, renderer, player, username = "@Guest", hp = 100;
     let keys = {}, velY = 0, jumping = false;
-    const btn = document.getElementById('play-btn');
-
-    // Кнопка станет активной, когда THREE подгрузится
-    btn.disabled = false;
-    btn.innerText = "PLAY";
-    btn.onclick = play;
 
     function play() {
+        if (!checkThree()) {
+            alert("Движок еще загружается, подождите 5 секунд и попробуйте снова.");
+            return;
+        }
         let n = document.getElementById('nick').value;
         if(n) username = n.startsWith('@') ? n : '@'+n;
         document.getElementById('login').style.display = 'none';
@@ -76,18 +72,18 @@
         scene.add(new THREE.AmbientLight(0xffffff, 0.9));
         scene.add(new THREE.GridHelper(100, 50));
 
-        // Красный блок урона
+        // Зона урона
         const lava = new THREE.Mesh(new THREE.BoxGeometry(6, 0.2, 6), new THREE.MeshPhongMaterial({color: 0xff0000}));
         lava.position.set(15, 0, -15);
         scene.add(lava);
 
-        // Загрузка модели
-        const loader = new GLTFLoader();
-        loader.load('Ternix.Guy.glb', (gltf) => {
+        // Загрузчик модели
+        const loader = new THREE.GLTFLoader();
+        loader.load('Ternix.Guy.glb', function(gltf) {
             player = gltf.scene;
             scene.add(player);
-        }, undefined, () => {
-            // Если модель не найдена - создаем нормального челика (тело, голова, руки)
+        }, undefined, function() {
+            // Если модели нет - создаем челика
             player = new THREE.Group();
             const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1.4, 0.6), new THREE.MeshPhongMaterial({color: 0x888888}));
             player.add(body);
@@ -99,12 +95,12 @@
 
         camera.position.set(0, 7, 12);
 
-        window.onkeydown = (e) => {
+        window.onkeydown = function(e) {
             if(e.key === '/') { e.preventDefault(); document.getElementById('chat-input').focus(); }
             if(e.code === 'Space' && !jumping) { velY = 0.25; jumping = true; }
             keys[e.code] = true;
         };
-        window.onkeyup = (e) => keys[e.code] = false;
+        window.onkeyup = function(e) { keys[e.code] = false; };
 
         animate();
     }
@@ -132,9 +128,9 @@
         renderer.render(scene, camera);
     }
 
-    document.getElementById('chat-input').onkeypress = (e) => {
+    document.getElementById('chat-input').onkeypress = function(e) {
         if(e.key === 'Enter' && e.target.value !== "") {
-            document.getElementById('chat-log').innerHTML += `<div><b>${username}:</b> ${e.target.value}</div>`;
+            document.getElementById('chat-log').innerHTML += '<div><b>' + username + ':</b> ' + e.target.value + '</div>';
             e.target.value = ""; e.target.blur();
         }
     };
