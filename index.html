@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>TerNix 3D Online</title>
+    <script src="https://unpkg.com"></script>
+    <script src="https://unpkg.com"></script>
+    <style>
+        body { margin: 0; overflow: hidden; background: #0055ff; font-family: Arial, sans-serif; }
+        #login { position: fixed; inset: 0; background: #0055ff; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        #login input { padding: 15px; width: 280px; border: none; font-size: 20px; text-align: center; margin-bottom: 20px; border-radius: 5px; }
+        #login button { padding: 15px 100px; background: #00aa00; color: white; border: none; font-weight: bold; cursor: pointer; font-size: 20px; border-radius: 5px; }
+        header { position: absolute; top: 0; width: 100%; height: 45px; background: #0044ee; color: white; display: flex; align-items: center; padding: 0 20px; z-index: 500; border-bottom: 2px solid #002288; box-sizing: border-box; }
+        #chat-bar { position: absolute; bottom: 0; width: 100%; background: #fff; border-top: 3px solid #333; padding: 15px; z-index: 600; box-sizing: border-box; }
+        #chat-input { width: 100%; border: none; outline: none; font-size: 18px; }
+        #hp-ui { position: absolute; top: 60px; right: 20px; background: rgba(0,0,0,0.6); padding: 10px; border: 2px solid #fff; z-index: 400; width: 180px; }
+        #hp-fill { width: 100%; height: 18px; background: red; transition: 0.3s; }
+    </style>
+</head>
+<body>
+
+<div id="login">
+    <h1 style="font-size: 60px;">TerNix</h1>
+    <input type="text" id="nick" placeholder="@username">
+    <button onclick="play()">PLAY</button>
+</div>
+
+<header><b>TerNix 3D Alpha</b> <div style="margin-left:auto">Hex: 100</div></header>
+
+<div id="hp-ui">
+    <div style="color:white; font-size:12px; font-weight:bold;">HEALTH</div>
+    <div style="background:#333;"><div id="hp-fill"></div></div>
+</div>
+
+<div id="chat-bar"><input type="text" id="chat-input" placeholder='Нажми "/" для чата...'></div>
+
+<script>
+    let scene, camera, renderer, player, username = "@Guest", hp = 100;
+    let keys = {}, velY = 0, jumping = false;
+
+    function play() {
+        let n = document.getElementById('nick').value;
+        if(n) username = n.startsWith('@') ? n : '@'+n;
+        document.getElementById('login').style.display = 'none';
+        init();
+    }
+
+    function init() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        scene.add(new THREE.GridHelper(100, 50));
+
+        // Красный блок урона
+        const lava = new THREE.Mesh(new THREE.BoxGeometry(6, 0.2, 6), new THREE.MeshPhongMaterial({color: 0xff0000}));
+        lava.position.set(15, 0, -15);
+        scene.add(lava);
+
+        // Загрузка твоей модели Ternix.Guy.glb (должна лежать рядом с index.html)
+        new THREE.GLTFLoader().load('Ternix.Guy.glb', (gltf) => {
+            player = gltf.scene;
+            scene.add(player);
+        }, undefined, () => {
+            // Фолбэк челик
+            player = new THREE.Group();
+            const b = new THREE.Mesh(new THREE.BoxGeometry(1, 1.4, 0.6), new THREE.MeshPhongMaterial({color: 0x888888}));
+            player.add(b);
+            scene.add(player);
+        });
+
+        camera.position.set(0, 7, 12);
+
+        window.onkeydown = (e) => {
+            if(e.key === '/') { e.preventDefault(); document.getElementById('chat-input').focus(); }
+            if(e.code === 'Space' && !jumping) { velY = 0.25; jumping = true; }
+            keys[e.code] = true;
+        };
+        window.onkeyup = (e) => keys[e.code] = false;
+
+        animate();
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        if(player && document.activeElement.id !== 'chat-input') {
+            if(keys['KeyW']) player.translateZ(-0.2);
+            if(keys['KeyS']) player.translateZ(0.2);
+            if(keys['KeyA']) player.rotation.y += 0.06;
+            if(keys['KeyD']) player.rotation.y -= 0.06;
+
+            player.position.y += velY;
+            if(player.position.y > 0) velY -= 0.012;
+            else { player.position.y = 0; velY = 0; jumping = false; }
+
+            // Урон
+            if(Math.abs(player.position.x - 15) < 3 && Math.abs(player.position.z + 15) < 3) {
+                hp -= 0.5; if(hp < 0) hp = 0;
+                document.getElementById('hp-fill').style.width = hp + "%";
+            }
+
+            camera.position.lerp(player.position.clone().add(new THREE.Vector3(0, 7, 12).applyQuaternion(player.quaternion)), 0.1);
+            camera.lookAt(player.position);
+        }
+        renderer.render(scene, camera);
+    }
+</script>
+</body>
+</html>
