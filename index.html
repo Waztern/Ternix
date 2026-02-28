@@ -2,71 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TerNix - Home Update</title>
+    <title>TerNix - 2010 Legacy</title>
     <style>
-        /* --- БАЗОВЫЙ СТИЛЬ (NO ROUNDED CORNERS) --- */
-        body { margin: 0; overflow: hidden; font-family: 'Arial', sans-serif; user-select: none; background: #111; }
+        /* --- TERNIX 2010 THEME --- */
+        body { margin: 0; overflow: hidden; font-family: 'Arial', sans-serif; background: #202020; user-select: none; }
         
-        /* Кнопки и UI - Квадратные края */
-        button, input, .panel { border-radius: 0px !important; }
+        /* Убираем закругления везде */
+        * { border-radius: 0 !important; box-sizing: border-box; }
 
-        /* --- ГЛАВНОЕ МЕНЮ (HOME) --- */
-        #home-screen {
-            position: absolute; inset: 0; background: #0d0d0d; z-index: 5000;
-            display: flex; flex-direction: column; color: white;
+        /* --- ЭКРАН ВХОДА (LOGIN) --- */
+        #login-screen {
+            position: absolute; inset: 0; background: #dcdcdc; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border: 5px solid #0055b3;
         }
-        .home-nav {
-            height: 60px; background: #1e1e1e; display: flex; align-items: center; padding: 0 40px; border-bottom: 2px solid #333;
+        .login-box {
+            width: 400px; background: white; border: 1px solid #777; padding: 20px;
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.2); text-align: center;
         }
-        .currency-box {
-            margin-left: auto; display: flex; gap: 20px; font-weight: bold; font-size: 18px;
+        .legacy-btn {
+            background: linear-gradient(#00a2ff, #0055b3); border: 1px solid #003366;
+            color: white; font-weight: bold; padding: 8px 20px; cursor: pointer; font-size: 16px; margin-top: 10px;
         }
-        .c-gold { color: #ffda00; } /* Fierens */
-        .c-blue { color: #00aaff; } /* Nex */
-
-        .game-grid {
-            padding: 40px; display: flex; gap: 20px; justify-content: center;
-        }
-        .game-card {
-            width: 200px; height: 240px; background: #222; border: 1px solid #444; cursor: pointer;
-            display: flex; flex-direction: column; transition: 0.2s;
-        }
-        .game-card:hover { border-color: white; transform: scale(1.02); }
-        .card-img { height: 150px; background: #444; display: flex; align-items: center; justify-content: center; color: #666; font-size: 40px; }
-        .card-info { padding: 15px; }
-        .card-title { font-weight: bold; font-size: 18px; margin-bottom: 5px; }
-        .play-btn-green {
-            width: 100%; padding: 10px; background: #00b06f; color: white; border: none; font-weight: bold; cursor: pointer; margin-top: auto;
+        .legacy-btn:hover { background: linear-gradient(#22b4ff, #0066cc); }
+        .legacy-input {
+            width: 100%; padding: 5px; border: 1px solid #999; font-size: 14px; margin-bottom: 10px;
         }
 
         /* --- ИГРОВОЙ ИНТЕРФЕЙС (HUD) --- */
         #game-ui { display: none; position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+
+        /* Верхняя панель */
+        .top-bar {
+            height: 30px; background: #0055b3; border-bottom: 2px solid white;
+            display: flex; align-items: center; padding: 0 10px; color: white; font-weight: bold; font-size: 14px;
+            pointer-events: auto;
+        }
+        .currency { margin-left: 20px; color: #ffcc00; }
         
         /* Таблица игроков */
         #leaderboard {
-            position: absolute; top: 20px; right: 20px; width: 200px; background: rgba(0,0,0,0.8); color: white; pointer-events: auto;
+            position: absolute; top: 40px; right: 10px; width: 180px;
+            background: rgba(0,0,0,0.5); border: 1px solid #555; color: white;
+            pointer-events: auto;
         }
-        .lb-head { background: #333; padding: 8px 12px; font-weight: bold; display: flex; justify-content: space-between; }
-        .lb-row { padding: 8px 12px; border-bottom: 1px solid #444; display: flex; justify-content: space-between; }
+        .lb-header { background: #333; padding: 5px; font-weight: bold; font-size: 12px; }
+        .lb-row { padding: 4px; font-size: 12px; border-bottom: 1px solid #444; display: flex; justify-content: space-between; }
 
-        /* Чат */
-        #chat-container {
-            position: absolute; top: 20px; left: 20px; width: 320px; height: 280px;
-            display: flex; flex-direction: column; pointer-events: auto;
+        /* Чат (Legacy Style) */
+        #chat-wrapper {
+            position: absolute; top: 40px; left: 10px; width: 300px; height: 200px;
+            pointer-events: auto; display: flex; flex-direction: column;
         }
-        #chat-log { flex: 1; overflow-y: auto; color: white; text-shadow: 1px 1px 2px black; margin-bottom: 10px; font-size: 16px; scrollbar-width: none;}
-        #chat-input { 
-            width: 100%; padding: 10px; background: rgba(0,0,0,0.6); border: 2px solid transparent; color: white; 
-            opacity: 0.5; transition: 0.2s; 
+        #chat-log {
+            flex: 1; background: rgba(0,0,0,0.3); border: 1px solid #777; overflow-y: auto;
+            color: white; text-shadow: 1px 1px 0 #000; padding: 5px; font-size: 14px; font-family: 'Verdana', sans-serif;
         }
-        #chat-input:focus { opacity: 1; background: rgba(0,0,0,0.9); border-color: white; outline: none; }
+        #chat-input {
+            width: 100%; height: 25px; border: 1px solid #fff; background: rgba(0,0,0,0.5); color: white; margin-top: 5px;
+        }
 
-        /* Ошибка загрузки */
-        #error-msg { 
-            position: absolute; bottom: 50%; width: 100%; text-align: center; color: #ff4444; font-weight: bold; display: none; text-shadow: 2px 2px 0 #000;
-        }
+        /* Сообщения */
+        #msg-area { position: absolute; top: 50%; width: 100%; text-align: center; color: red; font-weight: bold; font-size: 24px; text-shadow: 2px 2px 0 black; }
     </style>
+    <!-- Three.js Core -->
     <script type="importmap">
         {
             "imports": {
@@ -78,280 +77,309 @@
 </head>
 <body>
 
-    <!-- 1. MENU (HOME) -->
-    <div id="home-screen">
-        <div class="home-nav">
-            <h1 style="margin:0; font-style:italic;">TerNix</h1>
-            <div class="currency-box">
-                <span class="c-gold">Fierens: 100</span>
-                <span class="c-blue">Nex: 50</span>
-            </div>
+    <!-- 1. LOGIN SCREEN -->
+    <div id="login-screen">
+        <h1 style="color: #0055b3; margin: 0 0 20px 0; font-size: 40px;">TerNix</h1>
+        <div class="login-box">
+            <h3 style="margin-top:0">Member Login</h3>
+            <input type="text" id="username" class="legacy-input" placeholder="Username" value="Guest">
+            <input type="password" class="legacy-input" placeholder="Password" disabled style="background:#eee;">
+            <button class="legacy-btn" onclick="startGame()">Play Now</button>
         </div>
-        <div style="padding: 40px;">
-            <h2>Games</h2>
-            <div class="game-grid">
-                <!-- Карточка игры -->
-                <div class="game-card">
-                    <div class="card-img">🏰</div>
-                    <div class="card-info">
-                        <div class="card-title">Baseplate</div>
-                        <div style="color:#aaa; font-size:12px;">By Waztern</div>
-                    </div>
-                    <button class="play-btn-green" onclick="launchGame()">PLAY</button>
-                </div>
-                 <!-- Карточка аватара -->
-                 <div class="game-card" style="opacity: 0.5;">
-                    <div class="card-img">👕</div>
-                    <div class="card-info">
-                        <div class="card-title">Avatar Editor</div>
-                        <div style="color:#aaa; font-size:12px;">Coming Soon</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <p style="color:#555; font-size: 12px; margin-top: 10px;">TerNix 2014 Engine - No Plugins Required</p>
     </div>
 
-    <!-- 2. GAME UI -->
+    <!-- 2. GAME HUD -->
     <div id="game-ui">
+        <div class="top-bar">
+            <span>TerNix Alpha</span>
+            <span class="currency">Fierens: 100</span>
+            <span class="currency" style="color:#00aaff;">Nex: 50</span>
+            <button onclick="resetPlayer()" style="margin-left:auto; font-size:10px; cursor:pointer;">RESET CHAR</button>
+        </div>
+
         <div id="leaderboard">
-            <div class="lb-head"><span>People</span><span>Score</span></div>
+            <div class="lb-header">Players</div>
             <div id="lb-content"></div>
         </div>
 
-        <div id="chat-container">
-            <div id="chat-log"></div>
-            <input type="text" id="chat-input" placeholder="Press '/' to chat">
+        <div id="chat-wrapper">
+            <div id="chat-log">
+                <div style="color:#aaa;">System: Welcome to TerNix.</div>
+            </div>
+            <input type="text" id="chat-input" placeholder="Press '/' to chat...">
         </div>
-
-        <div id="error-msg">Model Not Found!<br>Ensure 'Ternix.Guy.glb' is in the root folder.</div>
+        
+        <div id="msg-area"></div>
     </div>
 
-    <!-- 3. 3D WORLD -->
-    <div id="scene-container"></div>
+    <!-- 3D CONTAINER -->
+    <div id="world"></div>
 
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // --- Global State ---
+        // --- CONFIG ---
         let scene, camera, renderer, player, controls;
-        let keys = { w:false, a:false, s:false, d:false, space:false };
+        let keys = { w:0, a:0, s:0, d:0 };
         let velocity = new THREE.Vector3();
-        let onGround = true;
-        let username = "Waztern"; 
+        let onGround = false;
         let isChatting = false;
-        let gameActive = false;
+        let myName = "Guest";
+        let platforms = []; // Для паркура
 
-        // --- UI Functions ---
-        window.launchGame = function() {
-            document.getElementById('home-screen').style.display = 'none';
+        window.startGame = function() {
+            const input = document.getElementById('username').value;
+            if(input) myName = input;
+            document.getElementById('login-screen').style.display = 'none';
             document.getElementById('game-ui').style.display = 'block';
-            gameActive = true;
-            init3D();
+            init();
             updateLeaderboard();
             animate();
+        };
+
+        window.resetPlayer = function() {
+            if(player) {
+                player.position.set(0, 5, 0);
+                velocity.set(0,0,0);
+            }
         }
 
         function updateLeaderboard() {
-            const list = document.getElementById('lb-content');
-            // Только ты, ботов убрали
-            list.innerHTML = `
-                <div class="lb-row">
-                    <span>${username}</span>
-                    <span style="color:#ffda00">100</span>
-                </div>
+            document.getElementById('lb-content').innerHTML = `
+                <div class="lb-row"><span>${myName}</span><span>100</span></div>
             `;
         }
 
-        // --- 3D ENGINE ---
-        function init3D() {
-            // Scene
+        function init() {
+            // 1. SCENE
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x87CEEB);
-            scene.fog = new THREE.Fog(0x87CEEB, 20, 100);
+            scene.background = new THREE.Color(0xb0d6f5); // Classic Sky
+            scene.fog = new THREE.Fog(0xb0d6f5, 20, 120);
 
-            // Camera
+            // 2. CAMERA
             camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 10, 15);
+            camera.position.set(0, 10, -15);
 
-            // Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            // 3. RENDERER
+            renderer = new THREE.WebGLRenderer({ antialias: false }); // False for retro feel
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
-            document.body.appendChild(renderer.domElement);
+            document.getElementById('world').appendChild(renderer.domElement);
 
-            // Controls (Roblox Style: Right Click to Orbit)
+            // 4. LIGHTS
+            const amb = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(amb);
+            const sun = new THREE.DirectionalLight(0xffffff, 1);
+            sun.position.set(20, 50, 20);
+            sun.castShadow = true;
+            scene.add(sun);
+
+            // 5. MAP GENERATION (PARKOUR)
+            createPlatform(0, 0, 0, 20, 20, 0x228822); // Spawn
+            createPlatform(0, 2, 18, 6, 6, 0x555555);  // Jump 1
+            createPlatform(0, 4, 30, 4, 4, 0x555555);  // Jump 2
+            createPlatform(5, 6, 40, 4, 4, 0x555555);  // Jump 3
+            createPlatform(-5, 8, 50, 4, 4, 0x555555); // Jump 4
+            createPlatform(0, 10, 65, 15, 15, 0xffda00); // Gold Finish
+
+            // Lava Floor
+            const lava = new THREE.Mesh(new THREE.PlaneGeometry(500, 500), new THREE.MeshBasicMaterial({color:0xff0000}));
+            lava.rotation.x = -Math.PI/2;
+            lava.position.y = -10;
+            scene.add(lava);
+
+            // 6. PLAYER (Try GLB -> Fail -> Make Noob)
+            loadPlayer();
+
+            // 7. CONTROLS
             controls = new OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.1;
             controls.enablePan = false;
             controls.minDistance = 5;
-            controls.maxDistance = 30;
-            controls.mouseButtons = { LEFT: null, MIDDLE: null, RIGHT: THREE.MOUSE.ROTATE }; // Только ПКМ крутит
+            controls.maxDistance = 25;
+            controls.mouseButtons = { LEFT: null, MIDDLE: null, RIGHT: THREE.MOUSE.ROTATE };
 
-            // Lights
-            const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
-            scene.add(hemiLight);
-            const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
-            dirLight.position.set(10, 50, 20);
-            dirLight.castShadow = true;
-            scene.add(dirLight);
+            // Events
+            document.addEventListener('keydown', onKeyDown);
+            document.addEventListener('keyup', onKeyUp);
+        }
 
-            // Floor
-            const floor = new THREE.Mesh(
-                new THREE.PlaneGeometry(200, 200), 
-                new THREE.MeshStandardMaterial({ color: 0x44aa44 })
-            );
-            floor.rotation.x = -Math.PI / 2;
-            floor.receiveShadow = true;
-            scene.add(floor);
+        function createPlatform(x, y, z, w, d, color) {
+            const geo = new THREE.BoxGeometry(w, 1, d);
+            const mat = new THREE.MeshLambertMaterial({ color: color });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(x, y, z);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+            
+            // Добавляем в массив для физики
+            platforms.push(new THREE.Box3().setFromObject(mesh));
+        }
 
-            // Grid
-            scene.add(new THREE.GridHelper(200, 50));
-
-            // Load Model
+        function loadPlayer() {
             const loader = new GLTFLoader();
+            // Пытаемся загрузить твой файл
             loader.load('./Ternix.Guy.glb', 
                 (gltf) => {
                     player = gltf.scene;
-                    player.scale.set(1, 1, 1); // Adjust Scale here
                     scene.add(player);
-                    
-                    // Создаем "Хитбокс" для игрока
-                    player.userData.velocity = new THREE.Vector3();
-                }, 
-                undefined, 
+                },
+                undefined,
                 (err) => {
-                    console.error(err);
-                    document.getElementById('error-msg').style.display = 'block';
-                    // Fallback Cube
-                    const geo = new THREE.BoxGeometry(2, 4, 2);
-                    const mat = new THREE.MeshStandardMaterial({color:'red'});
-                    player = new THREE.Mesh(geo, mat);
-                    player.position.y = 2;
-                    scene.add(player);
-                    player.userData.velocity = new THREE.Vector3();
+                    console.log("Модель сломана, создаем Нуба.");
+                    createNoob(); // Если ошибка - делаем робота
                 }
             );
-
-            // Input Listeners
-            window.addEventListener('keydown', onKeyDown);
-            window.addEventListener('keyup', onKeyUp);
         }
 
-        // --- CONTROLS LOGIC ---
+        function createNoob() {
+            player = new THREE.Group();
+            
+            const matY = new THREE.MeshStandardMaterial({color:0xffff00}); // Желтый
+            const matB = new THREE.MeshStandardMaterial({color:0x0000ff}); // Синий
+            const matG = new THREE.MeshStandardMaterial({color:0x00aa00}); // Зеленый
+
+            // Torso
+            const torso = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 1), matB);
+            torso.position.y = 2;
+            player.add(torso);
+
+            // Head
+            const head = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), matY);
+            head.position.y = 3.6;
+            player.add(head);
+
+            // Legs
+            const lleg = new THREE.Mesh(new THREE.BoxGeometry(0.9, 2, 1), matG);
+            lleg.position.set(-0.5, 1, 0);
+            player.add(lleg);
+            const rleg = new THREE.Mesh(new THREE.BoxGeometry(0.9, 2, 1), matG);
+            rleg.position.set(0.5, 1, 0);
+            player.add(rleg);
+
+            scene.add(player);
+            document.getElementById('msg-area').innerText = "";
+        }
+
+        // --- INPUT ---
+        const chatIn = document.getElementById('chat-input');
+        
         function onKeyDown(e) {
-            if (e.key === '/' && !isChatting) {
+            if(e.key === '/' && !isChatting) {
                 e.preventDefault();
-                toggleChat(true);
+                isChatting = true;
+                chatIn.focus();
+                keys.w=keys.a=keys.s=keys.d=0;
                 return;
             }
-            if (isChatting) return; // Блокируем ходьбу при чате
+            if(isChatting) return;
 
             switch(e.code) {
-                case 'KeyW': keys.w = true; break;
-                case 'KeyS': keys.s = true; break;
-                case 'KeyA': keys.a = true; break;
-                case 'KeyD': keys.d = true; break;
-                case 'Space': if(onGround) velocity.y = 0.5; onGround = false; break;
+                case 'KeyW': keys.w = 1; break;
+                case 'KeyS': keys.s = 1; break;
+                case 'KeyA': keys.a = 1; break;
+                case 'KeyD': keys.d = 1; break;
+                case 'Space': if(onGround) { velocity.y = 0.6; onGround=false; } break;
             }
         }
 
         function onKeyUp(e) {
             switch(e.code) {
-                case 'KeyW': keys.w = false; break;
-                case 'KeyS': keys.s = false; break;
-                case 'KeyA': keys.a = false; break;
-                case 'KeyD': keys.d = false; break;
+                case 'KeyW': keys.w = 0; break;
+                case 'KeyS': keys.s = 0; break;
+                case 'KeyA': keys.a = 0; break;
+                case 'KeyD': keys.d = 0; break;
             }
         }
 
-        // --- CHAT LOGIC ---
-        const chatIn = document.getElementById('chat-input');
         chatIn.addEventListener('keydown', (e) => {
             if(e.key === 'Enter') {
-                if(chatIn.value.trim()) {
+                if(chatIn.value) {
                     const log = document.getElementById('chat-log');
-                    log.innerHTML += `<div><b>[${username}]:</b> ${chatIn.value}</div>`;
+                    const d = document.createElement('div');
+                    d.innerHTML = `<b>[${myName}]:</b> ${chatIn.value}`;
+                    log.appendChild(d);
                     log.scrollTop = log.scrollHeight;
                 }
-                chatIn.value = '';
-                toggleChat(false); // Закрыть чат
+                chatIn.value = ""; chatIn.blur(); isChatting = false;
             }
         });
-
-        function toggleChat(active) {
-            isChatting = active;
-            if(active) {
-                chatIn.focus();
-                // Сброс движения чтобы не бежать вечно
-                keys.w = keys.a = keys.s = keys.d = false;
-            } else {
-                chatIn.blur();
-            }
-        }
 
         // --- PHYSICS LOOP ---
         function animate() {
             requestAnimationFrame(animate);
             if(!player) return;
 
-            // Camera Follow Target
+            // Cam Follow
             controls.target.copy(player.position);
             controls.update();
 
+            // Move
             if(!isChatting) {
-                // Определяем направление камеры
                 const camDir = new THREE.Vector3();
                 camera.getWorldDirection(camDir);
-                camDir.y = 0;
-                camDir.normalize();
+                camDir.y = 0; camDir.normalize();
+                const camSide = new THREE.Vector3().crossVectors(camera.up, camDir).normalize();
 
-                const camSide = new THREE.Vector3();
-                camSide.crossVectors(camera.up, camDir).normalize(); // Вправо
-
-                // Движение
-                const speed = 0.2;
-                if(keys.w) player.position.addScaledVector(camDir, speed);
-                if(keys.s) player.position.addScaledVector(camDir, -speed);
-                if(keys.a) player.position.addScaledVector(camSide, speed); // A и D инвертированы в 3JS
-                if(keys.d) player.position.addScaledVector(camSide, -speed);
-
-                // Поворот игрока в сторону движения
-                if (keys.w || keys.s || keys.a || keys.d) {
-                    const moveDir = new THREE.Vector3();
-                    if(keys.w) moveDir.add(camDir);
-                    if(keys.s) moveDir.sub(camDir);
-                    if(keys.a) moveDir.add(camSide);
-                    if(keys.d) moveDir.sub(camSide);
-                    
-                    if (moveDir.length() > 0) {
-                        const targetAngle = Math.atan2(moveDir.x, moveDir.z);
-                        player.rotation.y = targetAngle;
-                    }
+                if(keys.w) player.position.addScaledVector(camDir, 0.2);
+                if(keys.s) player.position.addScaledVector(camDir, -0.2);
+                if(keys.a) player.position.addScaledVector(camSide, 0.2);
+                if(keys.d) player.position.addScaledVector(camSide, -0.2);
+                
+                // Rotate
+                if(keys.w || keys.s || keys.a || keys.d) {
+                     const moveDir = new THREE.Vector3();
+                     if(keys.w) moveDir.add(camDir);
+                     if(keys.s) moveDir.sub(camDir);
+                     if(keys.a) moveDir.add(camSide);
+                     if(keys.d) moveDir.sub(camSide);
+                     if(moveDir.lengthSq() > 0) player.rotation.y = Math.atan2(moveDir.x, moveDir.z);
                 }
             }
 
-            // Гравитация и Прыжок
-            velocity.y -= 0.02; // Сила тяжести
+            // Gravity & Collision
+            velocity.y -= 0.02;
             player.position.y += velocity.y;
 
-            // Коллизия с полом
-            if(player.position.y <= 0) {
-                player.position.y = 0;
-                velocity.y = 0;
-                onGround = true;
+            // Simple Floor Check (Hardcoded 0 for spawn)
+            if(player.position.y < 0 && player.position.y > -5) {
+                // Check Platforms? Too complex for now, just infinite fall reset
+            }
+            
+            // Platform Collision (Simple)
+            onGround = false;
+            // Check Spawn
+            if(player.position.y <= 0 && player.position.x > -10 && player.position.x < 10 && player.position.z > -10 && player.position.z < 10) {
+                player.position.y = 0; velocity.y = 0; onGround = true;
+            }
+            // Check Parkour Blocks
+            platforms.forEach(box => {
+                if(box.containsPoint(player.position)) {
+                     // Very basic snap
+                     if(player.position.y > box.max.y - 1) {
+                         player.position.y = box.max.y;
+                         velocity.y = 0;
+                         onGround = true;
+                     }
+                }
+            });
+
+            // Lava Death
+            if(player.position.y < -20) {
+                resetPlayer();
             }
 
             renderer.render(scene, camera);
         }
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
+        window.onresize = () => {
+            camera.aspect = window.innerWidth/window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        }
     </script>
 </body>
 </html>
