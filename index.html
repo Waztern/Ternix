@@ -4,178 +4,164 @@
     <meta charset="UTF-8">
     <title>TerNix - Home (2014)</title>
     <style>
-        /* --- ROBLOX 2014 WEB THEME --- */
+        /* --- 2014 VISUAL STYLE --- */
         body { 
             margin: 0; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #e3e3e3; /* Светло-серый фон страницы */
+            background-color: #e3e3e3; /* Серый фон как в 2014 */
         }
         
-        /* Шапка (Header) */
-        .header-container {
-            background-color: #191919; /* Темная полоса */
-            height: 40px;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            border-bottom: 3px solid #ddd;
+        /* ШАПКА */
+        .header-black {
+            height: 40px; background-color: #191919; 
+            display: flex; align-items: center; padding: 0 15%;
+            border-bottom: 2px solid white;
         }
-        .nav-blue-bar {
-            background-color: #0074bd; /* Та самая синяя полоса */
-            height: 30px;
-            display: flex;
-            align-items: center;
-            color: white;
-            padding: 0 50px;
-            font-size: 14px;
-            font-weight: bold;
-            box-shadow: 0 2px 2px rgba(0,0,0,0.2);
+        .nav-blue {
+            height: 30px; background-color: #0074bd; /* Легендарный синий цвет */
+            display: flex; align-items: center; padding: 0 15%;
+            color: white; font-weight: bold; font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        .nav-link {
-            margin-right: 25px; cursor: pointer; text-decoration: none; color: white;
-        }
-        .nav-link:hover { text-decoration: underline; }
+        .nav-item { margin-right: 20px; cursor: pointer; }
+        .nav-item:hover { text-decoration: underline; }
 
-        /* Основной контент */
-        .container {
-            width: 970px;
-            margin: 20px auto;
-            background: white;
-            border: 1px solid #c3c3c3;
-            padding: 15px;
-            min-height: 600px;
+        /* КОНТЕЙНЕР */
+        .main-container {
+            width: 900px; min-height: 600px;
+            margin: 20px auto; background: white;
+            border: 1px solid #b8b8b8; padding: 15px;
         }
 
-        /* Профиль пользователя */
-        .user-stats {
-            text-align: right; flex: 1; font-size: 12px;
-        }
-        .robux { color: #02b757; font-weight: bold; margin-right: 10px; }
-        .tickets { color: #d8b30d; font-weight: bold; }
-
-        /* Карточки игр */
-        .games-grid {
-            display: flex; gap: 15px; margin-top: 20px;
-        }
+        /* КАРТОЧКИ ИГР */
+        .games-row { display: flex; gap: 15px; margin-top: 20px; }
+        
         .game-card {
-            width: 150px;
-            border: 1px solid #ccc;
-            cursor: pointer;
-            background: white;
+            width: 160px; height: 220px;
+            border: 1px solid #ccc; cursor: pointer;
         }
         .game-card:hover { border: 1px solid #0074bd; }
         
-        .thumb {
+        .g-thumb {
             width: 100%; height: 100px; background: #555;
             display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 12px; text-align: center;
+            color: white; font-size: 11px; text-align: center;
         }
-        
-        .game-title {
-            font-size: 12px; font-weight: bold; color: #0055b3;
-            padding: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .creator { color: #888; font-size: 10px; padding: 0 4px 4px; }
+        .g-info { padding: 5px; }
+        .g-title { color: #0055b3; font-weight: bold; font-size: 13px; margin-bottom: 5px; }
+        .g-creator { color: #888; font-size: 10px; }
 
-        /* Окно Входа (Overlay) */
-        #login-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
+        /* ВАЛЮТА */
+        .stats-box { margin-left: auto; font-size: 12px; }
+        .robux { color: #02b757; font-weight: bold; margin-right: 10px; }
+        .tix { color: #d8b30d; font-weight: bold; }
+
+        /* --- ОКНО РЕГИСТРАЦИИ (Оверлей) --- */
+        #login-screen {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
             display: flex; justify-content: center; align-items: center;
             z-index: 100;
         }
         .login-box {
-            width: 350px; background: white; border: 1px solid #777; padding: 10px;
+            width: 350px; background: white; border: 5px solid #0055b3;
+            padding: 0;
         }
-        .login-header {
-            background: linear-gradient(#fff, #e0e0e0);
-            border: 1px solid #aaa; padding: 5px 10px; font-weight: bold; margin-bottom: 10px;
-        }
-        .btn-legacy {
+        .lb-header {
             background: linear-gradient(#00a2ff, #0055b3);
-            border: 1px solid #002244; color: white;
-            padding: 4px 12px; cursor: pointer; font-weight: bold; font-size: 13px;
+            color: white; padding: 10px; font-weight: bold;
         }
-        input { border: 1px solid #999; padding: 4px; width: 100%; margin-bottom: 8px; }
-
+        .lb-body { padding: 20px; text-align: center; }
+        
+        .input-2014 {
+            width: 100%; padding: 5px; margin-bottom: 10px;
+            border: 1px solid #aaa;
+        }
+        .btn-green {
+            background: linear-gradient(#00dd00, #00aa00);
+            border: 1px solid #006600; color: white;
+            font-weight: bold; padding: 8px 20px; cursor: pointer;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
 
-    <!-- LOGIN MODAL -->
-    <div id="login-overlay">
+    <!-- 1. ЭКРАН ВХОДА -->
+    <div id="login-screen">
         <div class="login-box">
-            <div class="login-header">Member Login</div>
-            <div style="padding:10px;">
-                <label>Username</label>
-                <input type="text" id="username" placeholder="Username" value="Guest">
-                <label>Password</label>
-                <input type="password" placeholder="********">
-                <button class="btn-legacy" onclick="doLogin()">Login</button>
-                <button class="btn-legacy" style="background:linear-gradient(#fff,#ddd); color:black;" onclick="doLogin()">Register</button>
+            <div class="lb-header">Login to TerNix</div>
+            <div class="lb-body">
+                <input type="text" id="username" class="input-2014" placeholder="Username" value="Guest">
+                <input type="password" class="input-2014" placeholder="Password">
+                <button class="btn-green" onclick="doLogin()">Play Now</button>
             </div>
         </div>
     </div>
 
-    <!-- HEADER -->
-    <div class="header-container">
-        <h2 style="color:white; margin:0; font-style:italic; font-family:'Arial Black'; letter-spacing:-1px;">TerNix</h2>
-    </div>
-    
-    <!-- BLUE NAV -->
-    <div class="nav-blue-bar">
-        <a class="nav-link">Games</a>
-        <a class="nav-link">Catalog</a>
-        <a class="nav-link">Develop</a>
-        <a class="nav-link">Forum</a>
-        <div class="user-stats">
-            <span id="display-name" style="margin-right:15px; font-weight:bold;">Guest</span>
-            <span class="robux">Fierens: 15</span>
-            <span class="tickets">Nex: 100</span>
+    <!-- 2. ГЛАВНАЯ СТРАНИЦА (Скрыта до входа) -->
+    <div id="home-screen" style="display:none;">
+        <div class="header-black">
+            <h2 style="color:white; margin:0;">TerNix</h2>
         </div>
-    </div>
-
-    <!-- CONTENT -->
-    <div class="container">
-        <h1 style="font-size:24px; color:#333; border-bottom:1px solid #ccc; padding-bottom:5px;">Games</h1>
         
-        <div class="games-grid">
-            <!-- Game 1 -->
-            <div class="game-card" onclick="goToGame()">
-                <div class="thumb" style="background: url('https://tr.rbxcdn.com/5f706242794148278785000901064616/150/150/Image/Png') no-repeat center, #444;">
-                    CROSSROADS
+        <div class="nav-blue">
+            <div class="nav-item">Games</div>
+            <div class="nav-item">Catalog</div>
+            <div class="nav-item">People</div>
+            <div class="nav-item">Forum</div>
+            
+            <div class="stats-box">
+                <span id="display-name" style="margin-right:15px;">User</span>
+                <span class="robux">Fierens: 0</span>
+                <span class="tix">Nex: 100</span>
+            </div>
+        </div>
+
+        <div class="main-container">
+            <h1 style="font-size: 24px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Games</h1>
+            
+            <div class="games-row">
+                <!-- Игра 1 -->
+                <div class="game-card" onclick="startGame()">
+                    <div class="g-thumb" style="background-color:#3a3a3a;">
+                        CROSSROADS
+                    </div>
+                    <div class="g-info">
+                        <div class="g-title">Crossroads [Classic]</div>
+                        <div class="g-creator">By TerNix_Admin</div>
+                        <div style="font-size:10px; color:#555; margin-top:10px;">120 Playing</div>
+                    </div>
                 </div>
-                <div class="game-title">Crossroads</div>
-                <div class="creator">By TerNix_Admin</div>
-            </div>
 
-            <!-- Game 2 -->
-            <div class="game-card">
-                <div class="thumb" style="background-color:#800000;">CHAOS CANYON</div>
-                <div class="game-title">Chaos Canyon</div>
-                <div class="creator">By TerNix_Admin</div>
-            </div>
-
-            <!-- Game 3 -->
-            <div class="game-card">
-                <div class="thumb" style="background-color:#005500;">SWORD FIGHT</div>
-                <div class="game-title">Sword Fights on the Heights</div>
-                <div class="creator">By Telamon</div>
+                <!-- Игра 2 -->
+                <div class="game-card">
+                    <div class="g-thumb" style="background-color:#800000;">
+                        CHAOS
+                    </div>
+                    <div class="g-info">
+                        <div class="g-title">Chaos Canyon</div>
+                        <div class="g-creator">By TerNix_Admin</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
         function doLogin() {
-            const name = document.getElementById('username').value;
-            if(name.length < 3) { alert("Name too short!"); return; }
+            const user = document.getElementById('username').value;
+            if(user.length < 3) { alert("Name too short!"); return; }
             
-            localStorage.setItem('ternix_user', name);
-            document.getElementById('display-name').innerText = name;
-            document.getElementById('login-overlay').style.display = 'none';
+            // Сохраняем имя для игры
+            localStorage.setItem('ternix_username', user);
+            
+            document.getElementById('display-name').innerText = user;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('home-screen').style.display = 'block';
         }
 
-        function goToGame() {
+        function startGame() {
+            // Переход в файл игры
             window.location.href = "game.html";
         }
     </script>
