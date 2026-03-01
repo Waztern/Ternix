@@ -2,535 +2,115 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TerNix - The Building Brick</title>
+    <title>TerNix - Home</title>
     <style>
-        /* --- TERNIX LEGACY THEME (2010-2014) --- */
-        @import url('https://fonts.googleapis.com/css2?family=Verdana:wght@400;700&display=swap');
+        /* --- 2010 WEB THEME --- */
+        body { margin: 0; font-family: 'Verdana', sans-serif; background: white; color: #333; }
+        * { box-sizing: border-box; }
 
-        body { margin: 0; overflow: hidden; font-family: 'Verdana', sans-serif; background: #111; user-select: none; }
-        * { border-radius: 0 !important; box-sizing: border-box; outline: none; }
-
-        /* --- SHARED STYLES --- */
-        .blue-header {
-            background: linear-gradient(#007acc, #004d80);
-            color: white; padding: 10px; border: 1px solid #003355;
-            text-shadow: 1px 1px 0 #000; font-weight: bold; font-size: 14px;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        
-        .content-box {
-            background: white; border: 1px solid #555; padding: 15px;
+        /* Header */
+        .header-banner {
+            background: white; border-bottom: 1px solid #000; text-align: center; padding: 10px;
+            font-size: 24px; font-weight: bold; letter-spacing: 1px;
         }
 
-        .legacy-btn {
-            background: linear-gradient(#f2f2f2, #dcdcdc); border: 1px solid #999;
-            color: #333; font-weight: bold; padding: 6px 15px; cursor: pointer; font-size: 12px;
-            display: inline-block; text-align: center; text-decoration: none;
-        }
-        .legacy-btn:hover { background: white; border-color: #00a2ff; color: #00a2ff; }
-        .legacy-btn.primary {
-            background: linear-gradient(#00a2ff, #0066cc); border: 1px solid #003366; color: white;
-        }
-        .legacy-btn.primary:hover { background: linear-gradient(#22b4ff, #0077ee); }
-
-        .legacy-input {
-            width: 100%; padding: 6px; border: 1px solid #999; font-size: 13px; margin-bottom: 10px; font-family: 'Verdana';
-        }
-        .error-msg { color: red; font-size: 11px; margin-bottom: 5px; display: none; }
-
-        /* --- SCREENS --- */
-        #screen-login, #screen-home, #screen-game { position: absolute; inset: 0; }
-        
-        /* 1. LOGIN */
-        #screen-login {
-            background: #dcdcdc url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+CjxwYXRoIGQ9Ik0wIDBoNDB2NDBIMHoiIGZpbGw9IiNlNWU1ZTUiLz4KPHBhdGggZD0iTTAgNDBMMTQwIDBIMHoiIGZpbGw9IiNkNGQ0ZDQiIG9wYWNpdHk9IjAuMiIvPgo8L3N2Zz4=');
-            display: flex; align-items: center; justify-content: center; z-index: 30;
-        }
-        .login-panel { width: 350px; box-shadow: 4px 4px 0 rgba(0,0,0,0.2); }
-
-        /* 2. HOME */
-        #screen-home { background: #fff; display: none; flex-direction: column; z-index: 20; overflow-y: auto; }
-        .nav-bar {
-            height: 40px; background: #0055b3; border-bottom: 3px solid #fff;
-            display: flex; align-items: center; color: white; padding: 0 20px;
-        }
-        .nav-link { margin-right: 20px; font-weight: bold; cursor: pointer; }
-        .currency-tray { margin-left: auto; font-size: 12px; display: flex; gap: 15px; }
-        .coin-f { color: #22dd22; font-weight: bold; } /* Fierens */
-        .coin-n { color: #ffcc00; font-weight: bold; } /* Nex */
-
-        .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 40px; max-width: 1000px; margin: 0 auto; }
-        .game-card { border: 1px solid #ccc; cursor: pointer; transition: transform 0.1s; }
-        .game-card:hover { transform: scale(1.03); border-color: #0055b3; }
-        .game-thumb { height: 120px; background: #888; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
-        .game-info { padding: 8px; font-size: 12px; }
-
-        /* 3. GAME HUD */
-        #screen-game { display: none; z-index: 10; pointer-events: none; }
-        
-        /* Game Top Bar */
-        .game-top {
-            height: 32px; background: rgba(30,30,30,0.8); color: white;
-            display: flex; align-items: center; padding: 0 10px; font-size: 13px; pointer-events: auto;
-        }
-        .btn-exit { background: #cc0000; color: white; border: 1px solid #660000; padding: 2px 8px; margin-right: 15px; cursor: pointer; font-weight: bold; }
-        
-        /* Game Bottom Bar */
-        .game-bottom {
-            position: absolute; bottom: 0; width: 100%; height: 30px;
-            background: rgba(0,0,0,0.5); display: flex; align-items: center;
-            border-top: 1px solid #fff; pointer-events: auto;
-        }
-        #chat-input {
-            flex: 1; background: transparent; border: none; color: white; padding: 5px 10px;
-        }
-        
-        /* Player List */
-        .player-list {
-            position: absolute; top: 40px; right: 10px; width: 160px;
-            background: rgba(0,0,0,0.6); color: white; border: 1px solid #aaa;
-        }
-        .pl-head { background: #333; padding: 5px; font-weight: bold; font-size: 11px; text-align: center; }
-        .pl-item { padding: 4px; font-size: 12px; border-bottom: 1px solid #555; display: flex; justify-content: space-between; }
-
-        /* Chat Log */
-        #chat-feed {
-            position: absolute; top: 40px; left: 10px; width: 300px; height: 200px;
-            overflow-y: auto; text-shadow: 1px 1px 0 #000; font-size: 14px; color: white;
+        /* Navigation Bar (The Black Line) */
+        .nav-strip {
+            background: white; border-bottom: 2px solid black; border-top: 2px solid black;
+            display: flex; justify-content: space-between; padding: 5px 20px;
+            font-weight: bold; font-size: 18px; text-transform: uppercase;
         }
 
-        #crosshair {
-            position: absolute; top: 50%; left: 50%; width: 20px; height: 20px;
-            transform: translate(-50%, -50%); pointer-events: none;
+        /* Game Cards */
+        .games-container {
+            display: flex; justify-content: center; gap: 50px; padding: 80px 20px;
         }
+        .game-card {
+            text-align: center; cursor: pointer; transition: transform 0.2s;
+        }
+        .game-card:hover { transform: scale(1.05); }
+        .game-card h1 { font-size: 60px; margin: 0; font-weight: normal; }
+
+        /* Login Overlay */
+        #login-overlay {
+            position: fixed; inset: 0; background: #dcdcdc; z-index: 999;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .login-box {
+            background: white; border: 1px solid #555; padding: 30px; width: 400px; text-align: center;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+        }
+        .input-field {
+            width: 100%; padding: 8px; margin: 10px 0; font-family: 'Verdana';
+            border: 1px solid #888;
+        }
+        .btn-blue {
+            background: linear-gradient(#00a2ff, #0055b3); border: 1px solid #003366;
+            color: white; padding: 8px 20px; cursor: pointer; font-weight: bold; width: 100%;
+        }
+        .btn-blue:hover { background: linear-gradient(#22b4ff, #0066cc); }
+        .error { color: red; font-size: 12px; display: none; margin-bottom: 10px; }
+
     </style>
-    <!-- Three.js + Addons -->
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
-    </script>
 </head>
 <body>
 
-    <!-- 1. LOGIN SCREEN -->
-    <div id="screen-login">
-        <div class="login-panel">
-            <div class="blue-header">Member Login</div>
-            <div class="content-box" style="text-align: center;">
-                <h2 style="margin: 0 0 15px 0; color: #0055b3;">TerNix</h2>
-                
-                <input type="text" id="inp-user" class="legacy-input" placeholder="Username (3-20 chars, English only)">
-                <div id="err-user" class="error-msg">Invalid username! A-Z, 0-9 only.</div>
-                
-                <input type="password" id="inp-pass" class="legacy-input" placeholder="Password">
-                <div id="err-pass" class="error-msg">Password required!</div>
-
-                <button class="legacy-btn primary" onclick="tryLogin()">Login</button>
-                <button class="legacy-btn" onclick="alert('Registration is currently free!')">Register</button>
-            </div>
+    <!-- LOGIN SCREEN -->
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2 style="color:#0055b3; margin-top:0;">Member Login</h2>
+            <input type="text" id="u-name" class="input-field" placeholder="Username (3-20 chars)">
+            <input type="password" id="u-pass" class="input-field" placeholder="Password">
+            <div id="err-msg" class="error">Invalid Username or Password</div>
+            <button class="btn-blue" onclick="attemptLogin()">Login / Register</button>
         </div>
     </div>
 
-    <!-- 2. HOME SCREEN -->
-    <div id="screen-home">
-        <!-- Top Nav -->
-        <div class="nav-bar">
-            <h3 style="margin: 0 30px 0 0;">TerNix</h3>
-            <div class="nav-link" style="text-decoration: underline;">Games</div>
-            <div class="nav-link">Catalog</div>
-            <div class="nav-link">Forum</div>
-            
-            <div class="currency-tray">
-                <span>User: <b id="display-name">Guest</b></span>
-                <span class="coin-f">F: 0</span>
-                <span class="coin-n">N: 100</span>
-            </div>
-        </div>
-
-        <!-- Games List -->
-        <div class="game-grid">
-            <div class="game-card" onclick="launchGame('Crossroads')">
-                <div class="game-thumb" style="background:#2a9d8f;">MULTIPLAYER</div>
-                <div class="game-info">
-                    <b>Crossroads</b><br>
-                    <span style="color:#666;">by TerNixAdmin</span>
-                </div>
-            </div>
-            <div class="game-card" onclick="launchGame('Chaos Canyon')">
-                <div class="game-thumb" style="background:#e76f51;">COMBAT</div>
-                <div class="game-info">
-                    <b>Chaos Canyon</b><br>
-                    <span style="color:#666;">by TerNixAdmin</span>
-                </div>
-            </div>
+    <!-- HOME TAB (Your Design) -->
+    <div class="header-banner">Welcome To Ternix</div>
+    
+    <div class="nav-strip">
+        <div>HOME</div>
+        <div style="font-size:14px; align-self:center;">
+            FIERENS: <span style="color:green">0</span> | NEX: <span style="color:#ffcc00">100</span>
         </div>
     </div>
 
-    <!-- 3. GAME HUD -->
-    <div id="screen-game">
-        <!-- Top -->
-        <div class="game-top">
-            <button class="btn-exit" onclick="exitGame()">Exit Game</button>
-            <span style="margin-right:20px;">Menu</span>
-            <div style="margin-left:auto; font-weight:bold;">
-                <span class="coin-f">F: 0</span> &nbsp;|&nbsp; <span class="coin-n">N: 100</span>
-            </div>
-        </div>
-
-        <!-- Chat Feed -->
-        <div id="chat-feed">
-            <div style="color:#FFFF00;">System: Press 'C' to toggle Camera Mode.</div>
-            <div style="color:#FFFF00;">System: Click screen to lock mouse.</div>
-        </div>
-
-        <!-- Leaderboard -->
-        <div class="player-list">
-            <div class="pl-head">Players</div>
-            <div class="pl-item">
-                <span id="hud-name">Guest</span>
-                <span>100</span>
-            </div>
-        </div>
-
-        <!-- Bottom Input -->
-        <div class="game-bottom">
-            <span style="color:#aaa; margin-left:10px;">Chat:</span>
-            <input type="text" id="chat-input" placeholder="Press '/' to type here...">
+    <div class="games-container">
+        <!-- Game 1 -->
+        <div class="game-card" onclick="playGame()">
+            <h1>игра</h1>
+            <span>Crossroads</span>
         </div>
         
-        <!-- Crosshair (Hidden in some modes) -->
-        <div id="crosshair">
-            <svg width="20" height="20">
-                <line x1="10" y1="5" x2="10" y2="15" stroke="white" stroke-width="2"/>
-                <line x1="5" y1="10" x2="15" y2="10" stroke="white" stroke-width="2"/>
-            </svg>
+        <!-- Game 2 -->
+        <div class="game-card" onclick="alert('This game is under construction!')">
+            <h1>Игра</h1>
+            <span>Construct</span>
         </div>
     </div>
 
-    <!-- 3D CANVAS -->
-    <div id="world"></div>
-
-    <!-- GAME ENGINE -->
-    <script type="module">
-        import * as THREE from 'three';
-        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
-
-        // --- STATE ---
-        const state = {
-            username: "Guest",
-            inGame: false,
-            view: '3rd', // '1st' or '3rd'
-            cameraDist: 10
-        };
-
-        // --- GLOBAL ENGINE VARS ---
-        let scene, camera, renderer, controls;
-        let player, playerMesh, cameraPivot;
-        let move = { w:0, a:0, s:0, d:0, run:false };
-        let velocity = new THREE.Vector3();
-        let direction = new THREE.Vector3();
-        const clock = new THREE.Clock();
-
-        // --- UI LOGIC ---
-        
-        // Login Validator
-        window.tryLogin = function() {
-            const user = document.getElementById('inp-user').value;
-            const pass = document.getElementById('inp-pass').value;
+    <script>
+        function attemptLogin() {
+            const user = document.getElementById('u-name').value;
+            const pass = document.getElementById('u-pass').value;
+            // Regex: English letters/numbers, 3-20 chars
+            const validUser = /^[a-zA-Z0-9]{3,20}$/.test(user);
             
-            // Regex: English letters & numbers only, 3-20 chars
-            const userRegex = /^[a-zA-Z0-9]{3,20}$/;
-            
-            let valid = true;
-
-            if(!userRegex.test(user)) {
-                document.getElementById('err-user').style.display = 'block';
-                valid = false;
+            if (validUser && pass.length > 0) {
+                localStorage.setItem('ternix_user', user); // Save name for game
+                document.getElementById('login-overlay').style.display = 'none';
             } else {
-                document.getElementById('err-user').style.display = 'none';
-            }
-
-            if(!pass) {
-                document.getElementById('err-pass').style.display = 'block';
-                valid = false;
-            } else {
-                document.getElementById('err-pass').style.display = 'none';
-            }
-
-            if(valid) {
-                state.username = user;
-                document.getElementById('display-name').innerText = user;
-                document.getElementById('hud-name').innerText = user;
-                switchScreen('home');
-            }
-        };
-
-        // Navigation
-        function switchScreen(name) {
-            document.getElementById('screen-login').style.display = 'none';
-            document.getElementById('screen-home').style.display = 'none';
-            document.getElementById('screen-game').style.display = 'none';
-            document.getElementById('world').style.display = 'none'; // Hide 3D until game
-
-            if(name === 'login') document.getElementById('screen-login').style.display = 'flex';
-            if(name === 'home') document.getElementById('screen-home').style.display = 'flex';
-            if(name === 'game') {
-                document.getElementById('screen-game').style.display = 'block';
-                document.getElementById('world').style.display = 'block';
+                const err = document.getElementById('err-msg');
+                err.style.display = 'block';
+                err.innerText = !validUser ? "Username: 3-20 English chars only." : "Password required.";
             }
         }
 
-        window.launchGame = function(mapName) {
-            switchScreen('game');
-            if(!scene) initGame();
-            // Reset player
-            if(player) {
-                player.position.set(0, 5, 0);
-                velocity.set(0,0,0);
-            }
-        };
-
-        window.exitGame = function() {
-            controls.unlock(); // Release mouse
-            switchScreen('home');
-        };
-
-        // --- 3D ENGINE LOGIC ---
-
-        function initGame() {
-            // 1. Setup
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xb0d6f5); // 2010 Sky
-            scene.fog = new THREE.Fog(0xb0d6f5, 20, 100);
-
-            camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 1000);
-            
-            renderer = new THREE.WebGLRenderer({ antialias: false }); // Legacy rugged look
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true;
-            document.getElementById('world').appendChild(renderer.domElement);
-
-            // 2. Lights
-            const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
-            scene.add(hemi);
-            const dir = new THREE.DirectionalLight(0xffffff, 0.8);
-            dir.position.set(20, 50, 20);
-            dir.castShadow = true;
-            scene.add(dir);
-
-            // 3. Map (Parkour + Baseplate)
-            const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshLambertMaterial({ color: 0x228822 }));
-            ground.rotation.x = -Math.PI / 2;
-            ground.receiveShadow = true;
-            scene.add(ground);
-            
-            // Parkour Blocks
-            createBlock(0, 2, 10, 4, 1, 4, 0x555555);
-            createBlock(0, 4, 20, 4, 1, 4, 0x555555);
-            createBlock(6, 6, 25, 4, 1, 4, 0x555555);
-            createBlock(-6, 9, 30, 4, 1, 4, 0xffcc00); // Gold
-
-            // 4. Player Rig Setup (The fix for camera issues)
-            // The "Player" is a physics capsule (invisible group in this simple demo)
-            player = new THREE.Group();
-            player.position.set(0, 2, 0);
-            scene.add(player);
-
-            // Camera Pivot: This rotates with the mouse (Look X/Y)
-            cameraPivot = new THREE.Object3D();
-            player.add(cameraPivot); 
-            cameraPivot.position.y = 1.6; // Eye height
-
-            // Attach Controls to Pivot, NOT player (Separates look from movement direction)
-            controls = new PointerLockControls(cameraPivot, document.body);
-            
-            // Click to capture
-            document.getElementById('world').addEventListener('click', () => {
-                controls.lock();
-            });
-
-            // Load Character Mesh
-            const loader = new GLTFLoader();
-            loader.load('Ternix.Guy.glb', (gltf) => {
-                playerMesh = gltf.scene;
-                playerMesh.scale.set(1,1,1);
-                playerMesh.rotation.y = Math.PI; // Face forward
-                player.add(playerMesh);
-            }, undefined, (err) => {
-                console.log("Model not found, creating Noob...");
-                playerMesh = createNoob();
-                player.add(playerMesh);
-            });
-
-            // Events
-            document.addEventListener('keydown', onKeyDown);
-            document.addEventListener('keyup', onKeyUp);
-            document.addEventListener('wheel', onScroll);
-
-            // Start Loop
-            animate();
+        function playGame() {
+            // Redirect to the game file
+            window.location.href = 'game.html';
         }
-
-        function createBlock(x, y, z, w, h, d, col) {
-            const geo = new THREE.BoxGeometry(w, h, d);
-            const mat = new THREE.MeshLambertMaterial({ color: col });
-            const mesh = new THREE.Mesh(geo, mat);
-            mesh.position.set(x, y, z);
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-            scene.add(mesh);
-            return mesh;
-        }
-
-        function createNoob() {
-            const rig = new THREE.Group();
-            // Head
-            const head = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshLambertMaterial({color:0xffdd00}));
-            head.position.y = 1.5;
-            // Torso
-            const torso = new THREE.Mesh(new THREE.BoxGeometry(2,2,1), new THREE.MeshLambertMaterial({color:0x0000ff}));
-            torso.position.y = 0;
-            // Left Leg
-            const lLeg = new THREE.Mesh(new THREE.BoxGeometry(0.9,2,0.9), new THREE.MeshLambertMaterial({color:0x44aa44}));
-            lLeg.position.set(-0.5, -2, 0);
-            // Right Leg
-            const rLeg = new THREE.Mesh(new THREE.BoxGeometry(0.9,2,0.9), new THREE.MeshLambertMaterial({color:0x44aa44}));
-            rLeg.position.set(0.5, -2, 0);
-            
-            rig.add(head, torso, lLeg, rLeg);
-            rig.position.y = 1; // Offset center
-            return rig;
-        }
-
-        // --- CONTROLS ---
-        
-        function onKeyDown(e) {
-            switch(e.code) {
-                case 'KeyW': move.w = 1; break;
-                case 'KeyA': move.a = 1; break;
-                case 'KeyS': move.s = 1; break;
-                case 'KeyD': move.d = 1; break;
-                case 'Space': 
-                    if(player.position.y <= 2.1) velocity.y = 15; // Jump
-                    break;
-                case 'Slash':
-                    document.getElementById('chat-input').focus();
-                    controls.unlock();
-                    break;
-                case 'KeyC':
-                    state.view = state.view === '1st' ? '3rd' : '1st';
-                    break;
-            }
-        }
-
-        function onKeyUp(e) {
-            switch(e.code) {
-                case 'KeyW': move.w = 0; break;
-                case 'KeyA': move.a = 0; break;
-                case 'KeyS': move.s = 0; break;
-                case 'KeyD': move.d = 0; break;
-            }
-        }
-
-        function onScroll(e) {
-            if(state.view === '3rd') {
-                state.cameraDist += e.deltaY * 0.01;
-                state.cameraDist = Math.max(2, Math.min(20, state.cameraDist));
-            }
-        }
-
-        // --- PHYSICS & UPDATE ---
-
-        function animate() {
-            requestAnimationFrame(animate);
-            if(document.getElementById('screen-game').style.display === 'none') return;
-
-            const dt = clock.getDelta();
-
-            // 1. Physics (Simple Gravity)
-            velocity.y -= 30 * dt; // Gravity
-            player.position.y += velocity.y * dt;
-
-            // Floor Collision
-            if(player.position.y < 2) {
-                velocity.y = 0;
-                player.position.y = 2;
-            }
-
-            // 2. Movement (Relative to Camera Pivot)
-            if(controls.isLocked) {
-                // Get direction from Pivot (Look direction)
-                // We only care about Y rotation (yaw) for walking
-                const yaw = cameraPivot.rotation.y; 
-                // Wait! PointerLockControls rotates the OBJECT (cameraPivot). 
-                // We need to extract the forward direction from the pivot.
-                
-                direction.set(0,0,0);
-                
-                // W/S - Move along the direction camera is facing (projected flat)
-                const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(cameraPivot.quaternion);
-                forward.y = 0; forward.normalize();
-                
-                // A/D - Move Sideways
-                const right = new THREE.Vector3(1, 0, 0).applyQuaternion(cameraPivot.quaternion);
-                right.y = 0; right.normalize();
-
-                if(move.w) direction.add(forward);
-                if(move.s) direction.sub(forward);
-                if(move.d) direction.add(right);
-                if(move.a) direction.sub(right);
-
-                direction.normalize();
-                
-                // Apply Speed
-                const speed = 10;
-                if(move.w || move.s || move.a || move.d) {
-                    player.position.add(direction.multiplyScalar(speed * dt));
-                    
-                    // Rotate character mesh to face movement direction (Visual only)
-                    if(playerMesh && state.view === '3rd') {
-                        // Smooth rotation towards walking dir
-                        // Implementation simplified for demo:
-                         // const angle = Math.atan2(direction.x, direction.z);
-                         // playerMesh.rotation.y = angle;
-                    }
-                }
-            }
-
-            // 3. Camera Update
-            // PointerLock handles rotation of 'cameraPivot'.
-            // We just need to position the REAL camera relative to that pivot.
-            
-            if(state.view === '1st') {
-                camera.position.set(0, 0, 0); // Inside pivot
-                playerMesh.visible = false; // Hide self
-            } else {
-                // 3rd Person
-                playerMesh.visible = true;
-                // Back up along the Z axis of the pivot
-                const offset = new THREE.Vector3(0, 0.5, state.cameraDist);
-                offset.applyQuaternion(cameraPivot.quaternion);
-                camera.position.copy(cameraPivot.getWorldPosition(new THREE.Vector3()).add(offset));
-                camera.lookAt(cameraPivot.getWorldPosition(new THREE.Vector3()));
-            }
-            
-            renderer.render(scene, camera);
-        }
-        
-        // Resize handler
-        window.addEventListener('resize', () => {
-            if(camera && renderer) {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            }
-        });
-
     </script>
 </body>
 </html>
