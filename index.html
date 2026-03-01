@@ -2,114 +2,181 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TerNix - Home</title>
+    <title>TerNix - Home (2014)</title>
     <style>
-        /* --- 2010 WEB THEME --- */
-        body { margin: 0; font-family: 'Verdana', sans-serif; background: white; color: #333; }
-        * { box-sizing: border-box; }
+        /* --- ROBLOX 2014 WEB THEME --- */
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #e3e3e3; /* Светло-серый фон страницы */
+        }
+        
+        /* Шапка (Header) */
+        .header-container {
+            background-color: #191919; /* Темная полоса */
+            height: 40px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 3px solid #ddd;
+        }
+        .nav-blue-bar {
+            background-color: #0074bd; /* Та самая синяя полоса */
+            height: 30px;
+            display: flex;
+            align-items: center;
+            color: white;
+            padding: 0 50px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 2px rgba(0,0,0,0.2);
+        }
+        .nav-link {
+            margin-right: 25px; cursor: pointer; text-decoration: none; color: white;
+        }
+        .nav-link:hover { text-decoration: underline; }
 
-        /* Header */
-        .header-banner {
-            background: white; border-bottom: 1px solid #000; text-align: center; padding: 10px;
-            font-size: 24px; font-weight: bold; letter-spacing: 1px;
+        /* Основной контент */
+        .container {
+            width: 970px;
+            margin: 20px auto;
+            background: white;
+            border: 1px solid #c3c3c3;
+            padding: 15px;
+            min-height: 600px;
         }
 
-        /* Navigation Bar (The Black Line) */
-        .nav-strip {
-            background: white; border-bottom: 2px solid black; border-top: 2px solid black;
-            display: flex; justify-content: space-between; padding: 5px 20px;
-            font-weight: bold; font-size: 18px; text-transform: uppercase;
+        /* Профиль пользователя */
+        .user-stats {
+            text-align: right; flex: 1; font-size: 12px;
         }
+        .robux { color: #02b757; font-weight: bold; margin-right: 10px; }
+        .tickets { color: #d8b30d; font-weight: bold; }
 
-        /* Game Cards */
-        .games-container {
-            display: flex; justify-content: center; gap: 50px; padding: 80px 20px;
+        /* Карточки игр */
+        .games-grid {
+            display: flex; gap: 15px; margin-top: 20px;
         }
         .game-card {
-            text-align: center; cursor: pointer; transition: transform 0.2s;
+            width: 150px;
+            border: 1px solid #ccc;
+            cursor: pointer;
+            background: white;
         }
-        .game-card:hover { transform: scale(1.05); }
-        .game-card h1 { font-size: 60px; margin: 0; font-weight: normal; }
+        .game-card:hover { border: 1px solid #0074bd; }
+        
+        .thumb {
+            width: 100%; height: 100px; background: #555;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 12px; text-align: center;
+        }
+        
+        .game-title {
+            font-size: 12px; font-weight: bold; color: #0055b3;
+            padding: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .creator { color: #888; font-size: 10px; padding: 0 4px 4px; }
 
-        /* Login Overlay */
+        /* Окно Входа (Overlay) */
         #login-overlay {
-            position: fixed; inset: 0; background: #dcdcdc; z-index: 999;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
             display: flex; justify-content: center; align-items: center;
+            z-index: 100;
         }
         .login-box {
-            background: white; border: 1px solid #555; padding: 30px; width: 400px; text-align: center;
-            box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+            width: 350px; background: white; border: 1px solid #777; padding: 10px;
         }
-        .input-field {
-            width: 100%; padding: 8px; margin: 10px 0; font-family: 'Verdana';
-            border: 1px solid #888;
+        .login-header {
+            background: linear-gradient(#fff, #e0e0e0);
+            border: 1px solid #aaa; padding: 5px 10px; font-weight: bold; margin-bottom: 10px;
         }
-        .btn-blue {
-            background: linear-gradient(#00a2ff, #0055b3); border: 1px solid #003366;
-            color: white; padding: 8px 20px; cursor: pointer; font-weight: bold; width: 100%;
+        .btn-legacy {
+            background: linear-gradient(#00a2ff, #0055b3);
+            border: 1px solid #002244; color: white;
+            padding: 4px 12px; cursor: pointer; font-weight: bold; font-size: 13px;
         }
-        .btn-blue:hover { background: linear-gradient(#22b4ff, #0066cc); }
-        .error { color: red; font-size: 12px; display: none; margin-bottom: 10px; }
+        input { border: 1px solid #999; padding: 4px; width: 100%; margin-bottom: 8px; }
 
     </style>
 </head>
 <body>
 
-    <!-- LOGIN SCREEN -->
+    <!-- LOGIN MODAL -->
     <div id="login-overlay">
         <div class="login-box">
-            <h2 style="color:#0055b3; margin-top:0;">Member Login</h2>
-            <input type="text" id="u-name" class="input-field" placeholder="Username (3-20 chars)">
-            <input type="password" id="u-pass" class="input-field" placeholder="Password">
-            <div id="err-msg" class="error">Invalid Username or Password</div>
-            <button class="btn-blue" onclick="attemptLogin()">Login / Register</button>
+            <div class="login-header">Member Login</div>
+            <div style="padding:10px;">
+                <label>Username</label>
+                <input type="text" id="username" placeholder="Username" value="Guest">
+                <label>Password</label>
+                <input type="password" placeholder="********">
+                <button class="btn-legacy" onclick="doLogin()">Login</button>
+                <button class="btn-legacy" style="background:linear-gradient(#fff,#ddd); color:black;" onclick="doLogin()">Register</button>
+            </div>
         </div>
     </div>
 
-    <!-- HOME TAB (Your Design) -->
-    <div class="header-banner">Welcome To Ternix</div>
+    <!-- HEADER -->
+    <div class="header-container">
+        <h2 style="color:white; margin:0; font-style:italic; font-family:'Arial Black'; letter-spacing:-1px;">TerNix</h2>
+    </div>
     
-    <div class="nav-strip">
-        <div>HOME</div>
-        <div style="font-size:14px; align-self:center;">
-            FIERENS: <span style="color:green">0</span> | NEX: <span style="color:#ffcc00">100</span>
+    <!-- BLUE NAV -->
+    <div class="nav-blue-bar">
+        <a class="nav-link">Games</a>
+        <a class="nav-link">Catalog</a>
+        <a class="nav-link">Develop</a>
+        <a class="nav-link">Forum</a>
+        <div class="user-stats">
+            <span id="display-name" style="margin-right:15px; font-weight:bold;">Guest</span>
+            <span class="robux">Fierens: 15</span>
+            <span class="tickets">Nex: 100</span>
         </div>
     </div>
 
-    <div class="games-container">
-        <!-- Game 1 -->
-        <div class="game-card" onclick="playGame()">
-            <h1>игра</h1>
-            <span>Crossroads</span>
-        </div>
+    <!-- CONTENT -->
+    <div class="container">
+        <h1 style="font-size:24px; color:#333; border-bottom:1px solid #ccc; padding-bottom:5px;">Games</h1>
         
-        <!-- Game 2 -->
-        <div class="game-card" onclick="alert('This game is under construction!')">
-            <h1>Игра</h1>
-            <span>Construct</span>
+        <div class="games-grid">
+            <!-- Game 1 -->
+            <div class="game-card" onclick="goToGame()">
+                <div class="thumb" style="background: url('https://tr.rbxcdn.com/5f706242794148278785000901064616/150/150/Image/Png') no-repeat center, #444;">
+                    CROSSROADS
+                </div>
+                <div class="game-title">Crossroads</div>
+                <div class="creator">By TerNix_Admin</div>
+            </div>
+
+            <!-- Game 2 -->
+            <div class="game-card">
+                <div class="thumb" style="background-color:#800000;">CHAOS CANYON</div>
+                <div class="game-title">Chaos Canyon</div>
+                <div class="creator">By TerNix_Admin</div>
+            </div>
+
+            <!-- Game 3 -->
+            <div class="game-card">
+                <div class="thumb" style="background-color:#005500;">SWORD FIGHT</div>
+                <div class="game-title">Sword Fights on the Heights</div>
+                <div class="creator">By Telamon</div>
+            </div>
         </div>
     </div>
 
     <script>
-        function attemptLogin() {
-            const user = document.getElementById('u-name').value;
-            const pass = document.getElementById('u-pass').value;
-            // Regex: English letters/numbers, 3-20 chars
-            const validUser = /^[a-zA-Z0-9]{3,20}$/.test(user);
+        function doLogin() {
+            const name = document.getElementById('username').value;
+            if(name.length < 3) { alert("Name too short!"); return; }
             
-            if (validUser && pass.length > 0) {
-                localStorage.setItem('ternix_user', user); // Save name for game
-                document.getElementById('login-overlay').style.display = 'none';
-            } else {
-                const err = document.getElementById('err-msg');
-                err.style.display = 'block';
-                err.innerText = !validUser ? "Username: 3-20 English chars only." : "Password required.";
-            }
+            localStorage.setItem('ternix_user', name);
+            document.getElementById('display-name').innerText = name;
+            document.getElementById('login-overlay').style.display = 'none';
         }
 
-        function playGame() {
-            // Redirect to the game file
-            window.location.href = 'game.html';
+        function goToGame() {
+            window.location.href = "game.html";
         }
     </script>
 </body>
