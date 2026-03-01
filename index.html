@@ -2,70 +2,109 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TerNix - 2010 Legacy</title>
+    <title>TerNix - The Building Brick</title>
     <style>
-        /* --- TERNIX 2010 THEME --- */
-        body { margin: 0; overflow: hidden; font-family: 'Arial', sans-serif; background: #202020; user-select: none; }
-        
-        /* Убираем закругления везде */
-        * { border-radius: 0 !important; box-sizing: border-box; }
+        /* --- TERNIX LEGACY THEME (2010-2014) --- */
+        @import url('https://fonts.googleapis.com/css2?family=Verdana:wght@400;700&display=swap');
 
-        /* --- ЭКРАН ВХОДА (LOGIN) --- */
-        #login-screen {
-            position: absolute; inset: 0; background: #dcdcdc; z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border: 5px solid #0055b3;
+        body { margin: 0; overflow: hidden; font-family: 'Verdana', sans-serif; background: #111; user-select: none; }
+        * { border-radius: 0 !important; box-sizing: border-box; outline: none; }
+
+        /* --- SHARED STYLES --- */
+        .blue-header {
+            background: linear-gradient(#007acc, #004d80);
+            color: white; padding: 10px; border: 1px solid #003355;
+            text-shadow: 1px 1px 0 #000; font-weight: bold; font-size: 14px;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .login-box {
-            width: 400px; background: white; border: 1px solid #777; padding: 20px;
-            box-shadow: 5px 5px 0px rgba(0,0,0,0.2); text-align: center;
+        
+        .content-box {
+            background: white; border: 1px solid #555; padding: 15px;
         }
+
         .legacy-btn {
-            background: linear-gradient(#00a2ff, #0055b3); border: 1px solid #003366;
-            color: white; font-weight: bold; padding: 8px 20px; cursor: pointer; font-size: 16px; margin-top: 10px;
+            background: linear-gradient(#f2f2f2, #dcdcdc); border: 1px solid #999;
+            color: #333; font-weight: bold; padding: 6px 15px; cursor: pointer; font-size: 12px;
+            display: inline-block; text-align: center; text-decoration: none;
         }
-        .legacy-btn:hover { background: linear-gradient(#22b4ff, #0066cc); }
+        .legacy-btn:hover { background: white; border-color: #00a2ff; color: #00a2ff; }
+        .legacy-btn.primary {
+            background: linear-gradient(#00a2ff, #0066cc); border: 1px solid #003366; color: white;
+        }
+        .legacy-btn.primary:hover { background: linear-gradient(#22b4ff, #0077ee); }
+
         .legacy-input {
-            width: 100%; padding: 5px; border: 1px solid #999; font-size: 14px; margin-bottom: 10px;
+            width: 100%; padding: 6px; border: 1px solid #999; font-size: 13px; margin-bottom: 10px; font-family: 'Verdana';
         }
+        .error-msg { color: red; font-size: 11px; margin-bottom: 5px; display: none; }
 
-        /* --- ИГРОВОЙ ИНТЕРФЕЙС (HUD) --- */
-        #game-ui { display: none; position: absolute; inset: 0; pointer-events: none; z-index: 10; }
-
-        /* Верхняя панель */
-        .top-bar {
-            height: 30px; background: #0055b3; border-bottom: 2px solid white;
-            display: flex; align-items: center; padding: 0 10px; color: white; font-weight: bold; font-size: 14px;
-            pointer-events: auto;
-        }
-        .currency { margin-left: 20px; color: #ffcc00; }
+        /* --- SCREENS --- */
+        #screen-login, #screen-home, #screen-game { position: absolute; inset: 0; }
         
-        /* Таблица игроков */
-        #leaderboard {
-            position: absolute; top: 40px; right: 10px; width: 180px;
-            background: rgba(0,0,0,0.5); border: 1px solid #555; color: white;
-            pointer-events: auto;
+        /* 1. LOGIN */
+        #screen-login {
+            background: #dcdcdc url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+CjxwYXRoIGQ9Ik0wIDBoNDB2NDBIMHoiIGZpbGw9IiNlNWU1ZTUiLz4KPHBhdGggZD0iTTAgNDBMMTQwIDBIMHoiIGZpbGw9IiNkNGQ0ZDQiIG9wYWNpdHk9IjAuMiIvPgo8L3N2Zz4=');
+            display: flex; align-items: center; justify-content: center; z-index: 30;
         }
-        .lb-header { background: #333; padding: 5px; font-weight: bold; font-size: 12px; }
-        .lb-row { padding: 4px; font-size: 12px; border-bottom: 1px solid #444; display: flex; justify-content: space-between; }
+        .login-panel { width: 350px; box-shadow: 4px 4px 0 rgba(0,0,0,0.2); }
 
-        /* Чат (Legacy Style) */
-        #chat-wrapper {
-            position: absolute; top: 40px; left: 10px; width: 300px; height: 200px;
-            pointer-events: auto; display: flex; flex-direction: column;
+        /* 2. HOME */
+        #screen-home { background: #fff; display: none; flex-direction: column; z-index: 20; overflow-y: auto; }
+        .nav-bar {
+            height: 40px; background: #0055b3; border-bottom: 3px solid #fff;
+            display: flex; align-items: center; color: white; padding: 0 20px;
         }
-        #chat-log {
-            flex: 1; background: rgba(0,0,0,0.3); border: 1px solid #777; overflow-y: auto;
-            color: white; text-shadow: 1px 1px 0 #000; padding: 5px; font-size: 14px; font-family: 'Verdana', sans-serif;
+        .nav-link { margin-right: 20px; font-weight: bold; cursor: pointer; }
+        .currency-tray { margin-left: auto; font-size: 12px; display: flex; gap: 15px; }
+        .coin-f { color: #22dd22; font-weight: bold; } /* Fierens */
+        .coin-n { color: #ffcc00; font-weight: bold; } /* Nex */
+
+        .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; padding: 40px; max-width: 1000px; margin: 0 auto; }
+        .game-card { border: 1px solid #ccc; cursor: pointer; transition: transform 0.1s; }
+        .game-card:hover { transform: scale(1.03); border-color: #0055b3; }
+        .game-thumb { height: 120px; background: #888; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+        .game-info { padding: 8px; font-size: 12px; }
+
+        /* 3. GAME HUD */
+        #screen-game { display: none; z-index: 10; pointer-events: none; }
+        
+        /* Game Top Bar */
+        .game-top {
+            height: 32px; background: rgba(30,30,30,0.8); color: white;
+            display: flex; align-items: center; padding: 0 10px; font-size: 13px; pointer-events: auto;
+        }
+        .btn-exit { background: #cc0000; color: white; border: 1px solid #660000; padding: 2px 8px; margin-right: 15px; cursor: pointer; font-weight: bold; }
+        
+        /* Game Bottom Bar */
+        .game-bottom {
+            position: absolute; bottom: 0; width: 100%; height: 30px;
+            background: rgba(0,0,0,0.5); display: flex; align-items: center;
+            border-top: 1px solid #fff; pointer-events: auto;
         }
         #chat-input {
-            width: 100%; height: 25px; border: 1px solid #fff; background: rgba(0,0,0,0.5); color: white; margin-top: 5px;
+            flex: 1; background: transparent; border: none; color: white; padding: 5px 10px;
+        }
+        
+        /* Player List */
+        .player-list {
+            position: absolute; top: 40px; right: 10px; width: 160px;
+            background: rgba(0,0,0,0.6); color: white; border: 1px solid #aaa;
+        }
+        .pl-head { background: #333; padding: 5px; font-weight: bold; font-size: 11px; text-align: center; }
+        .pl-item { padding: 4px; font-size: 12px; border-bottom: 1px solid #555; display: flex; justify-content: space-between; }
+
+        /* Chat Log */
+        #chat-feed {
+            position: absolute; top: 40px; left: 10px; width: 300px; height: 200px;
+            overflow-y: auto; text-shadow: 1px 1px 0 #000; font-size: 14px; color: white;
         }
 
-        /* Сообщения */
-        #msg-area { position: absolute; top: 50%; width: 100%; text-align: center; color: red; font-weight: bold; font-size: 24px; text-shadow: 2px 2px 0 black; }
+        #crosshair {
+            position: absolute; top: 50%; left: 50%; width: 20px; height: 20px;
+            transform: translate(-50%, -50%); pointer-events: none;
+        }
     </style>
-    <!-- Three.js Core -->
+    <!-- Three.js + Addons -->
     <script type="importmap">
         {
             "imports": {
@@ -78,308 +117,420 @@
 <body>
 
     <!-- 1. LOGIN SCREEN -->
-    <div id="login-screen">
-        <h1 style="color: #0055b3; margin: 0 0 20px 0; font-size: 40px;">TerNix</h1>
-        <div class="login-box">
-            <h3 style="margin-top:0">Member Login</h3>
-            <input type="text" id="username" class="legacy-input" placeholder="Username" value="Guest">
-            <input type="password" class="legacy-input" placeholder="Password" disabled style="background:#eee;">
-            <button class="legacy-btn" onclick="startGame()">Play Now</button>
+    <div id="screen-login">
+        <div class="login-panel">
+            <div class="blue-header">Member Login</div>
+            <div class="content-box" style="text-align: center;">
+                <h2 style="margin: 0 0 15px 0; color: #0055b3;">TerNix</h2>
+                
+                <input type="text" id="inp-user" class="legacy-input" placeholder="Username (3-20 chars, English only)">
+                <div id="err-user" class="error-msg">Invalid username! A-Z, 0-9 only.</div>
+                
+                <input type="password" id="inp-pass" class="legacy-input" placeholder="Password">
+                <div id="err-pass" class="error-msg">Password required!</div>
+
+                <button class="legacy-btn primary" onclick="tryLogin()">Login</button>
+                <button class="legacy-btn" onclick="alert('Registration is currently free!')">Register</button>
+            </div>
         </div>
-        <p style="color:#555; font-size: 12px; margin-top: 10px;">TerNix 2014 Engine - No Plugins Required</p>
     </div>
 
-    <!-- 2. GAME HUD -->
-    <div id="game-ui">
-        <div class="top-bar">
-            <span>TerNix Alpha</span>
-            <span class="currency">Fierens: 100</span>
-            <span class="currency" style="color:#00aaff;">Nex: 50</span>
-            <button onclick="resetPlayer()" style="margin-left:auto; font-size:10px; cursor:pointer;">RESET CHAR</button>
-        </div>
-
-        <div id="leaderboard">
-            <div class="lb-header">Players</div>
-            <div id="lb-content"></div>
-        </div>
-
-        <div id="chat-wrapper">
-            <div id="chat-log">
-                <div style="color:#aaa;">System: Welcome to TerNix.</div>
+    <!-- 2. HOME SCREEN -->
+    <div id="screen-home">
+        <!-- Top Nav -->
+        <div class="nav-bar">
+            <h3 style="margin: 0 30px 0 0;">TerNix</h3>
+            <div class="nav-link" style="text-decoration: underline;">Games</div>
+            <div class="nav-link">Catalog</div>
+            <div class="nav-link">Forum</div>
+            
+            <div class="currency-tray">
+                <span>User: <b id="display-name">Guest</b></span>
+                <span class="coin-f">F: 0</span>
+                <span class="coin-n">N: 100</span>
             </div>
-            <input type="text" id="chat-input" placeholder="Press '/' to chat...">
+        </div>
+
+        <!-- Games List -->
+        <div class="game-grid">
+            <div class="game-card" onclick="launchGame('Crossroads')">
+                <div class="game-thumb" style="background:#2a9d8f;">MULTIPLAYER</div>
+                <div class="game-info">
+                    <b>Crossroads</b><br>
+                    <span style="color:#666;">by TerNixAdmin</span>
+                </div>
+            </div>
+            <div class="game-card" onclick="launchGame('Chaos Canyon')">
+                <div class="game-thumb" style="background:#e76f51;">COMBAT</div>
+                <div class="game-info">
+                    <b>Chaos Canyon</b><br>
+                    <span style="color:#666;">by TerNixAdmin</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. GAME HUD -->
+    <div id="screen-game">
+        <!-- Top -->
+        <div class="game-top">
+            <button class="btn-exit" onclick="exitGame()">Exit Game</button>
+            <span style="margin-right:20px;">Menu</span>
+            <div style="margin-left:auto; font-weight:bold;">
+                <span class="coin-f">F: 0</span> &nbsp;|&nbsp; <span class="coin-n">N: 100</span>
+            </div>
+        </div>
+
+        <!-- Chat Feed -->
+        <div id="chat-feed">
+            <div style="color:#FFFF00;">System: Press 'C' to toggle Camera Mode.</div>
+            <div style="color:#FFFF00;">System: Click screen to lock mouse.</div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="player-list">
+            <div class="pl-head">Players</div>
+            <div class="pl-item">
+                <span id="hud-name">Guest</span>
+                <span>100</span>
+            </div>
+        </div>
+
+        <!-- Bottom Input -->
+        <div class="game-bottom">
+            <span style="color:#aaa; margin-left:10px;">Chat:</span>
+            <input type="text" id="chat-input" placeholder="Press '/' to type here...">
         </div>
         
-        <div id="msg-area"></div>
+        <!-- Crosshair (Hidden in some modes) -->
+        <div id="crosshair">
+            <svg width="20" height="20">
+                <line x1="10" y1="5" x2="10" y2="15" stroke="white" stroke-width="2"/>
+                <line x1="5" y1="10" x2="15" y2="10" stroke="white" stroke-width="2"/>
+            </svg>
+        </div>
     </div>
 
-    <!-- 3D CONTAINER -->
+    <!-- 3D CANVAS -->
     <div id="world"></div>
 
+    <!-- GAME ENGINE -->
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
-        // --- CONFIG ---
-        let scene, camera, renderer, player, controls;
-        let keys = { w:0, a:0, s:0, d:0 };
-        let velocity = new THREE.Vector3();
-        let onGround = false;
-        let isChatting = false;
-        let myName = "Guest";
-        let platforms = []; // Для паркура
-
-        window.startGame = function() {
-            const input = document.getElementById('username').value;
-            if(input) myName = input;
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('game-ui').style.display = 'block';
-            init();
-            updateLeaderboard();
-            animate();
+        // --- STATE ---
+        const state = {
+            username: "Guest",
+            inGame: false,
+            view: '3rd', // '1st' or '3rd'
+            cameraDist: 10
         };
 
-        window.resetPlayer = function() {
+        // --- GLOBAL ENGINE VARS ---
+        let scene, camera, renderer, controls;
+        let player, playerMesh, cameraPivot;
+        let move = { w:0, a:0, s:0, d:0, run:false };
+        let velocity = new THREE.Vector3();
+        let direction = new THREE.Vector3();
+        const clock = new THREE.Clock();
+
+        // --- UI LOGIC ---
+        
+        // Login Validator
+        window.tryLogin = function() {
+            const user = document.getElementById('inp-user').value;
+            const pass = document.getElementById('inp-pass').value;
+            
+            // Regex: English letters & numbers only, 3-20 chars
+            const userRegex = /^[a-zA-Z0-9]{3,20}$/;
+            
+            let valid = true;
+
+            if(!userRegex.test(user)) {
+                document.getElementById('err-user').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('err-user').style.display = 'none';
+            }
+
+            if(!pass) {
+                document.getElementById('err-pass').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('err-pass').style.display = 'none';
+            }
+
+            if(valid) {
+                state.username = user;
+                document.getElementById('display-name').innerText = user;
+                document.getElementById('hud-name').innerText = user;
+                switchScreen('home');
+            }
+        };
+
+        // Navigation
+        function switchScreen(name) {
+            document.getElementById('screen-login').style.display = 'none';
+            document.getElementById('screen-home').style.display = 'none';
+            document.getElementById('screen-game').style.display = 'none';
+            document.getElementById('world').style.display = 'none'; // Hide 3D until game
+
+            if(name === 'login') document.getElementById('screen-login').style.display = 'flex';
+            if(name === 'home') document.getElementById('screen-home').style.display = 'flex';
+            if(name === 'game') {
+                document.getElementById('screen-game').style.display = 'block';
+                document.getElementById('world').style.display = 'block';
+            }
+        }
+
+        window.launchGame = function(mapName) {
+            switchScreen('game');
+            if(!scene) initGame();
+            // Reset player
             if(player) {
                 player.position.set(0, 5, 0);
                 velocity.set(0,0,0);
             }
-        }
+        };
 
-        function updateLeaderboard() {
-            document.getElementById('lb-content').innerHTML = `
-                <div class="lb-row"><span>${myName}</span><span>100</span></div>
-            `;
-        }
+        window.exitGame = function() {
+            controls.unlock(); // Release mouse
+            switchScreen('home');
+        };
 
-        function init() {
-            // 1. SCENE
+        // --- 3D ENGINE LOGIC ---
+
+        function initGame() {
+            // 1. Setup
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xb0d6f5); // Classic Sky
-            scene.fog = new THREE.Fog(0xb0d6f5, 20, 120);
+            scene.background = new THREE.Color(0xb0d6f5); // 2010 Sky
+            scene.fog = new THREE.Fog(0xb0d6f5, 20, 100);
 
-            // 2. CAMERA
             camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 10, -15);
-
-            // 3. RENDERER
-            renderer = new THREE.WebGLRenderer({ antialias: false }); // False for retro feel
+            
+            renderer = new THREE.WebGLRenderer({ antialias: false }); // Legacy rugged look
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
             document.getElementById('world').appendChild(renderer.domElement);
 
-            // 4. LIGHTS
-            const amb = new THREE.AmbientLight(0xffffff, 0.6);
-            scene.add(amb);
-            const sun = new THREE.DirectionalLight(0xffffff, 1);
-            sun.position.set(20, 50, 20);
-            sun.castShadow = true;
-            scene.add(sun);
+            // 2. Lights
+            const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.8);
+            scene.add(hemi);
+            const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+            dir.position.set(20, 50, 20);
+            dir.castShadow = true;
+            scene.add(dir);
 
-            // 5. MAP GENERATION (PARKOUR)
-            createPlatform(0, 0, 0, 20, 20, 0x228822); // Spawn
-            createPlatform(0, 2, 18, 6, 6, 0x555555);  // Jump 1
-            createPlatform(0, 4, 30, 4, 4, 0x555555);  // Jump 2
-            createPlatform(5, 6, 40, 4, 4, 0x555555);  // Jump 3
-            createPlatform(-5, 8, 50, 4, 4, 0x555555); // Jump 4
-            createPlatform(0, 10, 65, 15, 15, 0xffda00); // Gold Finish
+            // 3. Map (Parkour + Baseplate)
+            const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshLambertMaterial({ color: 0x228822 }));
+            ground.rotation.x = -Math.PI / 2;
+            ground.receiveShadow = true;
+            scene.add(ground);
+            
+            // Parkour Blocks
+            createBlock(0, 2, 10, 4, 1, 4, 0x555555);
+            createBlock(0, 4, 20, 4, 1, 4, 0x555555);
+            createBlock(6, 6, 25, 4, 1, 4, 0x555555);
+            createBlock(-6, 9, 30, 4, 1, 4, 0xffcc00); // Gold
 
-            // Lava Floor
-            const lava = new THREE.Mesh(new THREE.PlaneGeometry(500, 500), new THREE.MeshBasicMaterial({color:0xff0000}));
-            lava.rotation.x = -Math.PI/2;
-            lava.position.y = -10;
-            scene.add(lava);
+            // 4. Player Rig Setup (The fix for camera issues)
+            // The "Player" is a physics capsule (invisible group in this simple demo)
+            player = new THREE.Group();
+            player.position.set(0, 2, 0);
+            scene.add(player);
 
-            // 6. PLAYER (Try GLB -> Fail -> Make Noob)
-            loadPlayer();
+            // Camera Pivot: This rotates with the mouse (Look X/Y)
+            cameraPivot = new THREE.Object3D();
+            player.add(cameraPivot); 
+            cameraPivot.position.y = 1.6; // Eye height
 
-            // 7. CONTROLS
-            controls = new OrbitControls(camera, renderer.domElement);
-            controls.enablePan = false;
-            controls.minDistance = 5;
-            controls.maxDistance = 25;
-            controls.mouseButtons = { LEFT: null, MIDDLE: null, RIGHT: THREE.MOUSE.ROTATE };
+            // Attach Controls to Pivot, NOT player (Separates look from movement direction)
+            controls = new PointerLockControls(cameraPivot, document.body);
+            
+            // Click to capture
+            document.getElementById('world').addEventListener('click', () => {
+                controls.lock();
+            });
+
+            // Load Character Mesh
+            const loader = new GLTFLoader();
+            loader.load('Ternix.Guy.glb', (gltf) => {
+                playerMesh = gltf.scene;
+                playerMesh.scale.set(1,1,1);
+                playerMesh.rotation.y = Math.PI; // Face forward
+                player.add(playerMesh);
+            }, undefined, (err) => {
+                console.log("Model not found, creating Noob...");
+                playerMesh = createNoob();
+                player.add(playerMesh);
+            });
 
             // Events
             document.addEventListener('keydown', onKeyDown);
             document.addEventListener('keyup', onKeyUp);
+            document.addEventListener('wheel', onScroll);
+
+            // Start Loop
+            animate();
         }
 
-        function createPlatform(x, y, z, w, d, color) {
-            const geo = new THREE.BoxGeometry(w, 1, d);
-            const mat = new THREE.MeshLambertMaterial({ color: color });
+        function createBlock(x, y, z, w, h, d, col) {
+            const geo = new THREE.BoxGeometry(w, h, d);
+            const mat = new THREE.MeshLambertMaterial({ color: col });
             const mesh = new THREE.Mesh(geo, mat);
             mesh.position.set(x, y, z);
             mesh.castShadow = true;
             mesh.receiveShadow = true;
             scene.add(mesh);
-            
-            // Добавляем в массив для физики
-            platforms.push(new THREE.Box3().setFromObject(mesh));
-        }
-
-        function loadPlayer() {
-            const loader = new GLTFLoader();
-            // Пытаемся загрузить твой файл
-            loader.load('./Ternix.Guy.glb', 
-                (gltf) => {
-                    player = gltf.scene;
-                    scene.add(player);
-                },
-                undefined,
-                (err) => {
-                    console.log("Модель сломана, создаем Нуба.");
-                    createNoob(); // Если ошибка - делаем робота
-                }
-            );
+            return mesh;
         }
 
         function createNoob() {
-            player = new THREE.Group();
-            
-            const matY = new THREE.MeshStandardMaterial({color:0xffff00}); // Желтый
-            const matB = new THREE.MeshStandardMaterial({color:0x0000ff}); // Синий
-            const matG = new THREE.MeshStandardMaterial({color:0x00aa00}); // Зеленый
-
-            // Torso
-            const torso = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 1), matB);
-            torso.position.y = 2;
-            player.add(torso);
-
+            const rig = new THREE.Group();
             // Head
-            const head = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.2, 1.2), matY);
-            head.position.y = 3.6;
-            player.add(head);
-
-            // Legs
-            const lleg = new THREE.Mesh(new THREE.BoxGeometry(0.9, 2, 1), matG);
-            lleg.position.set(-0.5, 1, 0);
-            player.add(lleg);
-            const rleg = new THREE.Mesh(new THREE.BoxGeometry(0.9, 2, 1), matG);
-            rleg.position.set(0.5, 1, 0);
-            player.add(rleg);
-
-            scene.add(player);
-            document.getElementById('msg-area').innerText = "";
+            const head = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshLambertMaterial({color:0xffdd00}));
+            head.position.y = 1.5;
+            // Torso
+            const torso = new THREE.Mesh(new THREE.BoxGeometry(2,2,1), new THREE.MeshLambertMaterial({color:0x0000ff}));
+            torso.position.y = 0;
+            // Left Leg
+            const lLeg = new THREE.Mesh(new THREE.BoxGeometry(0.9,2,0.9), new THREE.MeshLambertMaterial({color:0x44aa44}));
+            lLeg.position.set(-0.5, -2, 0);
+            // Right Leg
+            const rLeg = new THREE.Mesh(new THREE.BoxGeometry(0.9,2,0.9), new THREE.MeshLambertMaterial({color:0x44aa44}));
+            rLeg.position.set(0.5, -2, 0);
+            
+            rig.add(head, torso, lLeg, rLeg);
+            rig.position.y = 1; // Offset center
+            return rig;
         }
 
-        // --- INPUT ---
-        const chatIn = document.getElementById('chat-input');
+        // --- CONTROLS ---
         
         function onKeyDown(e) {
-            if(e.key === '/' && !isChatting) {
-                e.preventDefault();
-                isChatting = true;
-                chatIn.focus();
-                keys.w=keys.a=keys.s=keys.d=0;
-                return;
-            }
-            if(isChatting) return;
-
             switch(e.code) {
-                case 'KeyW': keys.w = 1; break;
-                case 'KeyS': keys.s = 1; break;
-                case 'KeyA': keys.a = 1; break;
-                case 'KeyD': keys.d = 1; break;
-                case 'Space': if(onGround) { velocity.y = 0.6; onGround=false; } break;
+                case 'KeyW': move.w = 1; break;
+                case 'KeyA': move.a = 1; break;
+                case 'KeyS': move.s = 1; break;
+                case 'KeyD': move.d = 1; break;
+                case 'Space': 
+                    if(player.position.y <= 2.1) velocity.y = 15; // Jump
+                    break;
+                case 'Slash':
+                    document.getElementById('chat-input').focus();
+                    controls.unlock();
+                    break;
+                case 'KeyC':
+                    state.view = state.view === '1st' ? '3rd' : '1st';
+                    break;
             }
         }
 
         function onKeyUp(e) {
             switch(e.code) {
-                case 'KeyW': keys.w = 0; break;
-                case 'KeyS': keys.s = 0; break;
-                case 'KeyA': keys.a = 0; break;
-                case 'KeyD': keys.d = 0; break;
+                case 'KeyW': move.w = 0; break;
+                case 'KeyA': move.a = 0; break;
+                case 'KeyS': move.s = 0; break;
+                case 'KeyD': move.d = 0; break;
             }
         }
 
-        chatIn.addEventListener('keydown', (e) => {
-            if(e.key === 'Enter') {
-                if(chatIn.value) {
-                    const log = document.getElementById('chat-log');
-                    const d = document.createElement('div');
-                    d.innerHTML = `<b>[${myName}]:</b> ${chatIn.value}`;
-                    log.appendChild(d);
-                    log.scrollTop = log.scrollHeight;
+        function onScroll(e) {
+            if(state.view === '3rd') {
+                state.cameraDist += e.deltaY * 0.01;
+                state.cameraDist = Math.max(2, Math.min(20, state.cameraDist));
+            }
+        }
+
+        // --- PHYSICS & UPDATE ---
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if(document.getElementById('screen-game').style.display === 'none') return;
+
+            const dt = clock.getDelta();
+
+            // 1. Physics (Simple Gravity)
+            velocity.y -= 30 * dt; // Gravity
+            player.position.y += velocity.y * dt;
+
+            // Floor Collision
+            if(player.position.y < 2) {
+                velocity.y = 0;
+                player.position.y = 2;
+            }
+
+            // 2. Movement (Relative to Camera Pivot)
+            if(controls.isLocked) {
+                // Get direction from Pivot (Look direction)
+                // We only care about Y rotation (yaw) for walking
+                const yaw = cameraPivot.rotation.y; 
+                // Wait! PointerLockControls rotates the OBJECT (cameraPivot). 
+                // We need to extract the forward direction from the pivot.
+                
+                direction.set(0,0,0);
+                
+                // W/S - Move along the direction camera is facing (projected flat)
+                const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(cameraPivot.quaternion);
+                forward.y = 0; forward.normalize();
+                
+                // A/D - Move Sideways
+                const right = new THREE.Vector3(1, 0, 0).applyQuaternion(cameraPivot.quaternion);
+                right.y = 0; right.normalize();
+
+                if(move.w) direction.add(forward);
+                if(move.s) direction.sub(forward);
+                if(move.d) direction.add(right);
+                if(move.a) direction.sub(right);
+
+                direction.normalize();
+                
+                // Apply Speed
+                const speed = 10;
+                if(move.w || move.s || move.a || move.d) {
+                    player.position.add(direction.multiplyScalar(speed * dt));
+                    
+                    // Rotate character mesh to face movement direction (Visual only)
+                    if(playerMesh && state.view === '3rd') {
+                        // Smooth rotation towards walking dir
+                        // Implementation simplified for demo:
+                         // const angle = Math.atan2(direction.x, direction.z);
+                         // playerMesh.rotation.y = angle;
+                    }
                 }
-                chatIn.value = ""; chatIn.blur(); isChatting = false;
+            }
+
+            // 3. Camera Update
+            // PointerLock handles rotation of 'cameraPivot'.
+            // We just need to position the REAL camera relative to that pivot.
+            
+            if(state.view === '1st') {
+                camera.position.set(0, 0, 0); // Inside pivot
+                playerMesh.visible = false; // Hide self
+            } else {
+                // 3rd Person
+                playerMesh.visible = true;
+                // Back up along the Z axis of the pivot
+                const offset = new THREE.Vector3(0, 0.5, state.cameraDist);
+                offset.applyQuaternion(cameraPivot.quaternion);
+                camera.position.copy(cameraPivot.getWorldPosition(new THREE.Vector3()).add(offset));
+                camera.lookAt(cameraPivot.getWorldPosition(new THREE.Vector3()));
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Resize handler
+        window.addEventListener('resize', () => {
+            if(camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
             }
         });
 
-        // --- PHYSICS LOOP ---
-        function animate() {
-            requestAnimationFrame(animate);
-            if(!player) return;
-
-            // Cam Follow
-            controls.target.copy(player.position);
-            controls.update();
-
-            // Move
-            if(!isChatting) {
-                const camDir = new THREE.Vector3();
-                camera.getWorldDirection(camDir);
-                camDir.y = 0; camDir.normalize();
-                const camSide = new THREE.Vector3().crossVectors(camera.up, camDir).normalize();
-
-                if(keys.w) player.position.addScaledVector(camDir, 0.2);
-                if(keys.s) player.position.addScaledVector(camDir, -0.2);
-                if(keys.a) player.position.addScaledVector(camSide, 0.2);
-                if(keys.d) player.position.addScaledVector(camSide, -0.2);
-                
-                // Rotate
-                if(keys.w || keys.s || keys.a || keys.d) {
-                     const moveDir = new THREE.Vector3();
-                     if(keys.w) moveDir.add(camDir);
-                     if(keys.s) moveDir.sub(camDir);
-                     if(keys.a) moveDir.add(camSide);
-                     if(keys.d) moveDir.sub(camSide);
-                     if(moveDir.lengthSq() > 0) player.rotation.y = Math.atan2(moveDir.x, moveDir.z);
-                }
-            }
-
-            // Gravity & Collision
-            velocity.y -= 0.02;
-            player.position.y += velocity.y;
-
-            // Simple Floor Check (Hardcoded 0 for spawn)
-            if(player.position.y < 0 && player.position.y > -5) {
-                // Check Platforms? Too complex for now, just infinite fall reset
-            }
-            
-            // Platform Collision (Simple)
-            onGround = false;
-            // Check Spawn
-            if(player.position.y <= 0 && player.position.x > -10 && player.position.x < 10 && player.position.z > -10 && player.position.z < 10) {
-                player.position.y = 0; velocity.y = 0; onGround = true;
-            }
-            // Check Parkour Blocks
-            platforms.forEach(box => {
-                if(box.containsPoint(player.position)) {
-                     // Very basic snap
-                     if(player.position.y > box.max.y - 1) {
-                         player.position.y = box.max.y;
-                         velocity.y = 0;
-                         onGround = true;
-                     }
-                }
-            });
-
-            // Lava Death
-            if(player.position.y < -20) {
-                resetPlayer();
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        window.onresize = () => {
-            camera.aspect = window.innerWidth/window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
     </script>
 </body>
 </html>
