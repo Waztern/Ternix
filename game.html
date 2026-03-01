@@ -2,277 +2,295 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TerNix Player 2014</title>
+    <title>TerNix Player</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Arial', sans-serif; user-select: none; background: black; }
+        body { margin: 0; overflow: hidden; font-family: 'Arial', sans-serif; user-select: none; }
         
-        /* --- 2014 IN-GAME GUI (CORE GUI) --- */
-        #core-gui { position: absolute; inset: 0; pointer-events: none; }
+        /* --- 2014 IN-GAME GUI --- */
+        #gui-layer { position: absolute; inset: 0; pointer-events: none; }
 
-        /* Игрок Справа Сверху */
+        /* Таблица игроков (Справа сверху) */
         #player-list {
             position: absolute; top: 0; right: 20px; width: 160px;
-            background: rgba(30, 30, 30, 0.7); 
-            color: white; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;
+            background: rgba(30, 30, 30, 0.8); color: white;
         }
-        .pl-header {
-            background: #333; color: #eee; font-size: 12px; padding: 5px; font-weight: bold;
-            border-bottom: 1px solid #555;
-        }
-        .pl-entry {
-            padding: 4px 8px; font-size: 13px; display: flex; justify-content: space-between;
-        }
+        .pl-head { background: #333; padding: 5px; font-weight: bold; font-size: 12px; }
+        .pl-row { padding: 4px; font-size: 12px; border-bottom: 1px solid #555; display: flex; justify-content: space-between; }
 
-        /* Чат Слева Сверху */
-        #chat-container {
+        /* Чат (Слева сверху) */
+        #chat-box {
             position: absolute; top: 20px; left: 20px; width: 300px; height: 200px;
             display: flex; flex-direction: column; pointer-events: auto;
         }
-        #chat-box {
-            flex: 1; overflow-y: auto; 
-            text-shadow: 1px 1px 0 #000; font-size: 14px; color: white; font-weight: bold;
+        #chat-msgs {
+            flex: 1; text-shadow: 1px 1px 0 #000; color: white; font-size: 14px; 
+            overflow-y: auto; font-weight: bold;
         }
         #chat-input {
-            background: rgba(0,0,0,0.5); border: 1px solid #aaa; color: white;
-            display: none; /* Скрыт пока не нажмешь / */
+            background: rgba(0,0,0,0.5); border: 1px solid white; color: white;
+            display: none;
         }
 
-        /* Меню слева сверху (Гамбургер) */
+        /* Меню паузы / Выход */
+        #esc-menu {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+            background: rgba(0,0,0,0.8); padding: 20px; border: 2px solid white;
+            display: none; pointer-events: auto; text-align: center;
+        }
         .menu-btn {
-            position: absolute; top: -35px; left: 0; /* Скрыто для теста */
+            background: #cc0000; color: white; border: none; padding: 10px 20px;
+            font-size: 16px; cursor: pointer; margin-top: 10px;
         }
 
-        /* Инструкция в центре (исчезает) */
-        #click-to-play {
+        #start-msg {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             color: white; font-size: 24px; text-align: center; background: rgba(0,0,0,0.5); padding: 20px;
-            pointer-events: auto; cursor: pointer; border: 2px solid white;
         }
     </style>
+    <!-- Подключаем Three.js -->
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
     </script>
 </head>
 <body>
 
-    <!-- GUI -->
-    <div id="core-gui">
+    <!-- ИНТЕРФЕЙС -->
+    <div id="gui-layer">
         <div id="player-list">
-            <div class="pl-header">Leaderboard</div>
-            <div class="pl-entry">
-                <span id="my-name">Guest</span>
-                <span>100</span>
-            </div>
+            <div class="pl-head">Players</div>
+            <div class="pl-row"><span id="my-name">Guest</span><span>100</span></div>
         </div>
-
-        <div id="chat-container">
-            <div id="chat-box">
-                <div style="color:#ffff00;">System: Welcome to TerNix.</div>
+        
+        <div id="chat-box">
+            <div id="chat-msgs">
+                <div style="color:#ffff00;">System: Welcome to TerNix. Press '/' to chat.</div>
             </div>
-            <input type="text" id="chat-input" placeholder="Chat here...">
+            <input type="text" id="chat-input">
         </div>
     </div>
 
-    <div id="click-to-play">
-        CLICK TO PLAY<br>
-        <span style="font-size:14px">(WASD to Move, Mouse to Look)</span>
+    <div id="esc-menu">
+        <h2 style="color:white; margin-top:0;">Game Menu</h2>
+        <button class="menu-btn" onclick="location.href='index.html'">Leave Game</button>
+        <br><br>
+        <button class="menu-btn" style="background:#444;" onclick="resume()">Resume</button>
     </div>
 
-    <!-- 3D CANVAS -->
-    <div id="game-world"></div>
+    <div id="start-msg">CLICK TO START</div>
+    
+    <div id="world"></div>
 
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
         import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
-        // 1. НАСТРОЙКА МИРА
+        const USER = localStorage.getItem('ternix_username') || "Guest";
+        document.getElementById('my-name').innerText = USER;
+
+        // 1. МИР
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0xb0d6f5); // Небо 2014
-        scene.fog = new THREE.Fog(0xb0d6f5, 10, 100);
+        scene.fog = new THREE.Fog(0xb0d6f5, 20, 120);
 
         const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: false });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMap.enabled = true;
-        document.body.appendChild(renderer.domElement);
+        document.getElementById('world').appendChild(renderer.domElement);
 
         // Свет
+        const amb = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(amb);
         const sun = new THREE.DirectionalLight(0xffffff, 0.8);
         sun.position.set(50, 100, 50);
         sun.castShadow = true;
         scene.add(sun);
-        const amb = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(amb);
 
-        // 2. КАРТА (Crossroads Style)
-        const matGray = new THREE.MeshLambertMaterial({color: 0x666666});
-        const matGreen = new THREE.MeshLambertMaterial({color: 0x287f26});
+        // 2. КАРТА И ФИЗИКА (COLLISION)
+        const colliders = []; // Сюда добавляем стены
 
-        // Земля
-        const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), matGreen);
-        floor.rotation.x = -Math.PI/2;
-        floor.receiveShadow = true;
-        scene.add(floor);
+        function createPart(x, y, z, w, h, d, color) {
+            const geo = new THREE.BoxGeometry(w, h, d);
+            const mat = new THREE.MeshLambertMaterial({ color: color });
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.set(x, y, z);
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+            
+            // Создаем "коробку" для физики
+            mesh.geometry.computeBoundingBox();
+            const box = new THREE.Box3().setFromObject(mesh);
+            colliders.push(box); 
+            return mesh;
+        }
 
-        // Стена/Блок
-        const wall = new THREE.Mesh(new THREE.BoxGeometry(10, 10, 10), matGray);
-        wall.position.set(0, 5, -20);
-        wall.castShadow = true;
-        scene.add(wall);
+        // Строим карту
+        createPart(0, -1, 0, 200, 2, 200, 0x287f26); // Трава
+        createPart(0, 2.5, -10, 10, 5, 10, 0x666666); // Стена
+        createPart(-15, 1, 0, 5, 2, 5, 0xff0000); // Куб
+        createPart(15, 2, 0, 8, 1, 8, 0x0000ff); // Платформа
 
-        // 3. ИГРОК И УПРАВЛЕНИЕ
-        let moveForward = false;
-        let moveBackward = false;
-        let moveLeft = false;
-        let moveRight = false;
+        // 3. ИГРОК
+        const player = new THREE.Group();
+        scene.add(player);
+        
+        // Центр вращения камеры (на уровне головы)
+        const cameraPivot = new THREE.Object3D();
+        cameraPivot.position.y = 1.6;
+        player.add(cameraPivot);
+
+        // Загрузка модели
+        const loader = new GLTFLoader();
+        loader.load('Ternix.Guy.glb', (gltf) => {
+            const model = gltf.scene;
+            model.scale.set(0.4, 0.4, 0.4); // Уменьшил, чтобы не был гигантом
+            model.position.y = -1.6; // Опустил модель к ногам
+            model.rotation.y = Math.PI; // Развернул спиной
+            cameraPivot.add(model);
+        }, undefined, () => {
+            // Если модели нет - создаем куб (Нуба)
+            const box = new THREE.Mesh(new THREE.BoxGeometry(1,2,1), new THREE.MeshStandardMaterial({color:'yellow'}));
+            box.position.y = -0.6;
+            cameraPivot.add(box);
+        });
+
+        // 4. УПРАВЛЕНИЕ
+        const controls = new PointerLockControls(cameraPivot, document.body);
+        const keys = { w:0, a:0, s:0, d:0 };
+        const vel = new THREE.Vector3();
         let canJump = false;
 
-        const velocity = new THREE.Vector3();
-        const direction = new THREE.Vector3();
-
-        // Управление мышкой (PointerLock)
-        const controls = new PointerLockControls(camera, document.body);
-        
-        const overlay = document.getElementById('click-to-play');
-        
-        overlay.addEventListener('click', () => {
-            controls.lock(); // Блокируем курсор
-        });
+        // Клик - захват мыши
+        document.getElementById('start-msg').onclick = () => controls.lock();
+        window.resume = () => { document.getElementById('esc-menu').style.display='none'; controls.lock(); }
 
         controls.addEventListener('lock', () => {
-            overlay.style.display = 'none';
+            document.getElementById('start-msg').style.display = 'none';
+            document.getElementById('esc-menu').style.display = 'none';
         });
-
         controls.addEventListener('unlock', () => {
-            overlay.style.display = 'block';
+            if(document.getElementById('chat-input').style.display === 'none') {
+                document.getElementById('esc-menu').style.display = 'block';
+            }
         });
 
-        scene.add(controls.getObject());
-
-        // Клавиатура
-        const onKeyDown = function(event) {
-            switch (event.code) {
-                case 'ArrowUp':
-                case 'KeyW': moveForward = true; break;
-                case 'ArrowLeft':
-                case 'KeyA': moveLeft = true; break;
-                case 'ArrowDown':
-                case 'KeyS': moveBackward = true; break;
-                case 'ArrowRight':
-                case 'KeyD': moveRight = true; break;
-                case 'Space':
-                    if (canJump === true) velocity.y += 25; // Прыжок
-                    canJump = false;
-                    break;
-                case 'Slash': // Чат
+        document.addEventListener('keydown', (e) => {
+            switch(e.code) {
+                case 'KeyW': keys.w = 1; break;
+                case 'KeyS': keys.s = 1; break;
+                case 'KeyA': keys.a = 1; break;
+                case 'KeyD': keys.d = 1; break;
+                case 'Space': if(canJump) vel.y = 15; canJump = false; break; // Прыжок
+                case 'Slash': 
                     if(controls.isLocked) {
                         controls.unlock();
-                        setTimeout(() => document.getElementById('chat-input').style.display = 'block', 100);
-                        document.getElementById('chat-input').focus();
+                        setTimeout(() => {
+                            document.getElementById('chat-input').style.display = 'block';
+                            document.getElementById('chat-input').focus();
+                        }, 100);
                     }
                     break;
             }
-        };
+        });
 
-        const onKeyUp = function(event) {
-            switch (event.code) {
-                case 'ArrowUp':
-                case 'KeyW': moveForward = false; break;
-                case 'ArrowLeft':
-                case 'KeyA': moveLeft = false; break;
-                case 'ArrowDown':
-                case 'KeyS': moveBackward = false; break;
-                case 'ArrowRight':
-                case 'KeyD': moveRight = false; break;
+        document.addEventListener('keyup', (e) => {
+            switch(e.code) {
+                case 'KeyW': keys.w = 0; break;
+                case 'KeyS': keys.s = 0; break;
+                case 'KeyA': keys.a = 0; break;
+                case 'KeyD': keys.d = 0; break;
             }
-        };
+        });
 
-        document.addEventListener('keydown', onKeyDown);
-        document.addEventListener('keyup', onKeyUp);
-
-        // Чат Логика
-        const chatInp = document.getElementById('chat-input');
-        chatInp.addEventListener('keydown', (e) => {
+        // Чат
+        document.getElementById('chat-input').addEventListener('keydown', (e) => {
             if(e.key === 'Enter') {
-                const msg = chatInp.value;
-                if(msg) {
-                    const div = document.createElement('div');
-                    div.innerText = localStorage.getItem('ternix_user') + ": " + msg;
-                    document.getElementById('chat-box').appendChild(div);
+                const txt = e.target.value;
+                if(txt) {
+                    const el = document.createElement('div');
+                    el.innerText = USER + ": " + txt;
+                    document.getElementById('chat-msgs').appendChild(el);
                 }
-                chatInp.value = '';
-                chatInp.style.display = 'none';
-                controls.lock(); // Возвращаем управление
+                e.target.value = '';
+                e.target.style.display = 'none';
+                controls.lock();
             }
         });
 
-        // Загрузка Персонажа (Или создание Нуба)
-        let playerModel = null;
-        const loader = new GLTFLoader();
-        
-        // Попытка загрузить файл
-        loader.load('Ternix.Guy.glb', (gltf) => {
-            playerModel = gltf.scene;
-            playerModel.scale.set(0.5, 0.5, 0.5); // Уменьшаем модель
-            scene.add(playerModel);
-        }, undefined, (error) => {
-            console.log("Модель не найдена, создаем куб.");
-            // Нет модели - не страшно, камера сама по себе игрок
-        });
+        // 5. ОБНОВЛЕНИЕ (PHYSICS LOOP)
+        const clock = new THREE.Clock();
 
-        // 4. ГЛАВНЫЙ ЦИКЛ (PHYSICS)
-        let prevTime = performance.now();
+        function checkCol(pos) {
+            // Простая проверка точки в коробке (можно улучшить)
+            const pBox = new THREE.Box3();
+            pBox.min.set(pos.x - 0.5, pos.y, pos.z - 0.5);
+            pBox.max.set(pos.x + 0.5, pos.y + 1.8, pos.z + 0.5);
+            
+            for(let box of colliders) {
+                if(box.intersectsBox(pBox)) return true;
+            }
+            return false;
+        }
 
         function animate() {
             requestAnimationFrame(animate);
+            
+            const dt = Math.min(clock.getDelta(), 0.1);
 
-            const time = performance.now();
-            const delta = (time - prevTime) / 1000;
+            if(controls.isLocked) {
+                // Гравитация
+                vel.y -= 30 * dt;
 
-            if (controls.isLocked === true) {
-                // Торможение
-                velocity.x -= velocity.x * 10.0 * delta;
-                velocity.z -= velocity.z * 10.0 * delta;
-                velocity.y -= 9.8 * 10.0 * delta; // Гравитация (100.0 = масса)
+                // Движение WASD (относительно взгляда камеры)
+                const speed = 10;
+                const dir = new THREE.Vector3();
+                const forward = new THREE.Vector3(0,0,-1).applyQuaternion(cameraPivot.quaternion);
+                forward.y = 0; forward.normalize();
+                const right = new THREE.Vector3(1,0,0).applyQuaternion(cameraPivot.quaternion);
+                right.y = 0; right.normalize();
 
-                direction.z = Number(moveForward) - Number(moveBackward);
-                direction.x = Number(moveRight) - Number(moveLeft);
-                direction.normalize(); // чтобы по диагонали не бегал быстрее
+                if(keys.w) dir.add(forward);
+                if(keys.s) dir.sub(forward);
+                if(keys.d) dir.add(right);
+                if(keys.a) dir.sub(right);
 
-                if (moveForward || moveBackward) velocity.z -= direction.z * 400.0 * delta;
-                if (moveLeft || moveRight) velocity.x -= direction.x * 400.0 * delta;
+                if(dir.length() > 0) dir.normalize().multiplyScalar(speed * dt);
 
-                controls.moveRight(-velocity.x * delta);
-                controls.moveForward(-velocity.z * delta);
+                // Применяем X и Z с коллизией
+                const oldPos = player.position.clone();
+                player.position.x += dir.x;
+                if(checkCol(player.position)) player.position.x = oldPos.x; // Отмена если стена
 
-                // Пол
-                if (controls.getObject().position.y < 5) { // 5 = высота глаз
-                    velocity.y = 0;
-                    controls.getObject().position.y = 5;
+                player.position.z += dir.z;
+                if(checkCol(player.position)) player.position.z = oldPos.z; // Отмена если стена
+
+                // Применяем Y (Пол)
+                player.position.y += vel.y * dt;
+                if(player.position.y < 0) { // Пол на уровне 0
+                    player.position.y = 0;
+                    vel.y = 0;
                     canJump = true;
                 }
-                
-                // Двигаем модель за камерой (если она есть)
-                if(playerModel) {
-                    playerModel.position.copy(controls.getObject().position);
-                    playerModel.position.y -= 5; // Опускаем модель к ногам
-                    // Поворот модели спиной к камере
-                    playerModel.rotation.y = controls.getObject().rotation.y; 
+                // Если попал в стену в прыжке
+                if(checkCol(player.position) && player.position.y > 0) {
+                    player.position.y = oldPos.y;
+                    vel.y = 0;
                 }
             }
 
-            prevTime = time;
+            // КАМЕРА (Следит за игроком сзади)
+            // Смещаем камеру назад от Pivot
+            const camDist = 8; // Дистанция камеры (как просил, подальше)
+            const camPos = new THREE.Vector3(0, 2, camDist).applyQuaternion(cameraPivot.quaternion);
+            const worldPos = cameraPivot.getWorldPosition(new THREE.Vector3());
+            
+            camera.position.lerp(worldPos.clone().add(camPos), 0.5); // Плавность
+            camera.lookAt(worldPos);
+
             renderer.render(scene, camera);
         }
-
-        // Имя
-        document.getElementById('my-name').innerText = localStorage.getItem('ternix_user') || "Guest";
 
         animate();
     </script>
