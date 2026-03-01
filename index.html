@@ -4,166 +4,130 @@
     <meta charset="UTF-8">
     <title>TerNix - Home (2014)</title>
     <style>
-        /* --- 2014 VISUAL STYLE --- */
-        body { 
-            margin: 0; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #e3e3e3; /* Серый фон как в 2014 */
+        /* Стиль 2014 года */
+        body { margin: 0; font-family: 'Verdana', sans-serif; background-color: #e3e3e3; }
+        
+        /* Шапка */
+        .header {
+            height: 40px; background: #1e1e1e; display: flex; align-items: center; padding: 0 20px;
+            color: white; font-weight: bold; border-bottom: 2px solid white;
         }
         
-        /* ШАПКА */
-        .header-black {
-            height: 40px; background-color: #191919; 
-            display: flex; align-items: center; padding: 0 15%;
-            border-bottom: 2px solid white;
+        /* Синяя полоса меню */
+        .nav-bar {
+            height: 35px; background: #0074bd; border-bottom: 1px solid #003366;
+            display: flex; align-items: center; padding: 0 20px; color: white;
+            font-size: 14px; box-shadow: 0 3px 5px rgba(0,0,0,0.1);
         }
-        .nav-blue {
-            height: 30px; background-color: #0074bd; /* Легендарный синий цвет */
-            display: flex; align-items: center; padding: 0 15%;
-            color: white; font-weight: bold; font-size: 14px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .nav-item { margin-right: 20px; cursor: pointer; }
-        .nav-item:hover { text-decoration: underline; }
+        .nav-link { margin-right: 20px; cursor: pointer; }
+        .nav-link:hover { text-decoration: underline; }
 
-        /* КОНТЕЙНЕР */
-        .main-container {
-            width: 900px; min-height: 600px;
-            margin: 20px auto; background: white;
-            border: 1px solid #b8b8b8; padding: 15px;
+        /* Контент */
+        .container {
+            width: 900px; margin: 20px auto; background: white; border: 1px solid #b8b8b8;
+            min-height: 600px; padding: 20px;
         }
 
-        /* КАРТОЧКИ ИГР */
-        .games-row { display: flex; gap: 15px; margin-top: 20px; }
-        
+        /* Игры */
         .game-card {
-            width: 160px; height: 220px;
-            border: 1px solid #ccc; cursor: pointer;
+            width: 150px; border: 1px solid #ccc; cursor: pointer; display: inline-block; margin-right: 15px;
         }
         .game-card:hover { border: 1px solid #0074bd; }
-        
-        .g-thumb {
-            width: 100%; height: 100px; background: #555;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 11px; text-align: center;
-        }
-        .g-info { padding: 5px; }
-        .g-title { color: #0055b3; font-weight: bold; font-size: 13px; margin-bottom: 5px; }
-        .g-creator { color: #888; font-size: 10px; }
+        .thumb { width: 100%; height: 100px; background: #555; display: flex; align-items: center; justify-content: center; color: white; }
+        .info { padding: 5px; font-size: 12px; }
+        .g-name { color: #0055b3; font-weight: bold; margin-bottom: 5px; }
 
-        /* ВАЛЮТА */
-        .stats-box { margin-left: auto; font-size: 12px; }
-        .robux { color: #02b757; font-weight: bold; margin-right: 10px; }
-        .tix { color: #d8b30d; font-weight: bold; }
-
-        /* --- ОКНО РЕГИСТРАЦИИ (Оверлей) --- */
-        #login-screen {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+        /* --- ОКНО ВХОДА --- */
+        #login-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999;
             display: flex; justify-content: center; align-items: center;
-            z-index: 100;
         }
         .login-box {
-            width: 350px; background: white; border: 5px solid #0055b3;
-            padding: 0;
+            width: 300px; background: white; border: 4px solid #0055b3; padding: 0;
         }
-        .lb-header {
-            background: linear-gradient(#00a2ff, #0055b3);
-            color: white; padding: 10px; font-weight: bold;
-        }
+        .lb-head { background: #0055b3; color: white; padding: 8px; font-weight: bold; text-align: center; }
         .lb-body { padding: 20px; text-align: center; }
         
-        .input-2014 {
-            width: 100%; padding: 5px; margin-bottom: 10px;
-            border: 1px solid #aaa;
-        }
-        .btn-green {
-            background: linear-gradient(#00dd00, #00aa00);
-            border: 1px solid #006600; color: white;
-            font-weight: bold; padding: 8px 20px; cursor: pointer;
-            width: 100%;
-        }
+        input { width: 90%; padding: 5px; margin-bottom: 10px; border: 1px solid #999; }
+        .btn-go { background: #00aa00; color: white; border: 1px solid #006600; padding: 5px 15px; cursor: pointer; font-weight: bold; }
+        
+        .error-text { color: red; font-size: 11px; margin-bottom: 10px; display: none; }
     </style>
 </head>
 <body>
 
-    <!-- 1. ЭКРАН ВХОДА -->
-    <div id="login-screen">
+    <!-- LOGIN -->
+    <div id="login-overlay">
         <div class="login-box">
-            <div class="lb-header">Login to TerNix</div>
+            <div class="lb-head">Login to TerNix</div>
             <div class="lb-body">
-                <input type="text" id="username" class="input-2014" placeholder="Username" value="Guest">
-                <input type="password" class="input-2014" placeholder="Password">
-                <button class="btn-green" onclick="doLogin()">Play Now</button>
+                <input type="text" id="u-name" placeholder="Username (English Only)">
+                <input type="password" id="u-pass" placeholder="Password">
+                <div id="err" class="error-text">Error: English letters & numbers only!</div>
+                <button class="btn-go" onclick="tryLogin()">Play</button>
             </div>
         </div>
     </div>
 
-    <!-- 2. ГЛАВНАЯ СТРАНИЦА (Скрыта до входа) -->
-    <div id="home-screen" style="display:none;">
-        <div class="header-black">
-            <h2 style="color:white; margin:0;">TerNix</h2>
-        </div>
-        
-        <div class="nav-blue">
-            <div class="nav-item">Games</div>
-            <div class="nav-item">Catalog</div>
-            <div class="nav-item">People</div>
-            <div class="nav-item">Forum</div>
-            
-            <div class="stats-box">
-                <span id="display-name" style="margin-right:15px;">User</span>
-                <span class="robux">Fierens: 0</span>
-                <span class="tix">Nex: 100</span>
+    <!-- SITE -->
+    <div id="site" style="display:none;">
+        <div class="header">TerNix</div>
+        <div class="nav-bar">
+            <div class="nav-link">Games</div>
+            <div class="nav-link">Catalog</div>
+            <div class="nav-link">Forum</div>
+            <div style="margin-left:auto;">
+                User: <b id="disp-name">Guest</b> | F: 0 | N: 100
             </div>
         </div>
 
-        <div class="main-container">
-            <h1 style="font-size: 24px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Games</h1>
-            
-            <div class="games-row">
-                <!-- Игра 1 -->
-                <div class="game-card" onclick="startGame()">
-                    <div class="g-thumb" style="background-color:#3a3a3a;">
-                        CROSSROADS
-                    </div>
-                    <div class="g-info">
-                        <div class="g-title">Crossroads [Classic]</div>
-                        <div class="g-creator">By TerNix_Admin</div>
-                        <div style="font-size:10px; color:#555; margin-top:10px;">120 Playing</div>
-                    </div>
+        <div class="container">
+            <h3>Most Popular</h3>
+            <div class="game-card" onclick="window.location.href='game.html'">
+                <div class="thumb" style="background:#333;">CROSSROADS</div>
+                <div class="info">
+                    <div class="g-name">Crossroads</div>
+                    <div>By Admin</div>
                 </div>
-
-                <!-- Игра 2 -->
-                <div class="game-card">
-                    <div class="g-thumb" style="background-color:#800000;">
-                        CHAOS
-                    </div>
-                    <div class="g-info">
-                        <div class="g-title">Chaos Canyon</div>
-                        <div class="g-creator">By TerNix_Admin</div>
-                    </div>
+            </div>
+            <div class="game-card">
+                <div class="thumb" style="background:#800;">CHAOS</div>
+                <div class="info">
+                    <div class="g-name">Chaos Canyon</div>
+                    <div>By Admin</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        function doLogin() {
-            const user = document.getElementById('username').value;
-            if(user.length < 3) { alert("Name too short!"); return; }
+        function tryLogin() {
+            const user = document.getElementById('u-name').value;
+            const err = document.getElementById('err');
             
-            // Сохраняем имя для игры
-            localStorage.setItem('ternix_username', user);
-            
-            document.getElementById('display-name').innerText = user;
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('home-screen').style.display = 'block';
-        }
+            // СТРОГАЯ ПРОВЕРКА: Только Английские буквы (A-Z, a-z) и цифры (0-9)
+            // Никаких пробелов, никаких русских букв.
+            const strictRegex = /^[a-zA-Z0-9]+$/;
 
-        function startGame() {
-            // Переход в файл игры
-            window.location.href = "game.html";
+            if (!strictRegex.test(user)) {
+                err.style.display = 'block';
+                err.innerText = "Only English letters and numbers allowed!";
+                return;
+            }
+            
+            if (user.length < 3) {
+                err.style.display = 'block';
+                err.innerText = "Username too short (min 3 chars).";
+                return;
+            }
+
+            // Если все ок
+            localStorage.setItem('ternix_user', user);
+            document.getElementById('disp-name').innerText = user;
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('site').style.display = 'block';
         }
     </script>
 </body>
 </html>
+
