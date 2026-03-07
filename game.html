@@ -277,3 +277,14 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+
+        // Добавляем системное сообщение при старте
+        setTimeout(() => {
+            const sys = document.createElement('div');
+            sys.className = 'chat-msg';
+            sys.innerHTML = `<span style="color:#aaa">System:</span> Welcome to TerNix! Press '/' to chat.`;
+            chatHist.appendChild(sys);
+        }, 500);
+    </script>
+</body>
+</html>
