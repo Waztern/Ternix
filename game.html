@@ -2,86 +2,60 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TerNix Client - 2014 Legacy</title>
+    <title>TerNix Player (Fixed Controls)</title>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Arial', sans-serif; user-select: none; }
         
-        /* --- ИНТЕРФЕЙС 2014 --- */
+        /* --- GUI 2014 --- */
         #gui { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
 
-        /* 1. ИСТОРИЯ ЧАТА (Слева сверху, без фона) */
+        /* 1. ЧАТ: ИСТОРИЯ */
         #chat-history {
             position: absolute; top: 5px; left: 5px; width: 500px; height: 300px;
             display: flex; flex-direction: column; justify-content: flex-end;
             overflow: hidden;
-            font-size: 16px; color: white; 
-            /* Жесткая черная обводка (Legacy стиль) */
-            text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+            font-size: 16px; color: white; font-weight: bold;
+            text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000; /* Обводка */
         }
         .chat-msg { margin-bottom: 2px; padding-left: 5px; }
 
-        /* 2. ПОЛОСА ВВОДА (Снизу, во всю ширину) */
+        /* 2. ЧАТ: ВВОД (СНИЗУ) */
         #chat-bar {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 28px;
-            background: rgba(0, 0, 0, 0.7); /* Темная полоса */
-            border-top: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0, 0, 0, 0.7); border-top: 1px solid #555;
             pointer-events: auto; display: flex; align-items: center;
-            transition: opacity 0.2s;
         }
-        #chat-label {
-            color: #ccc; font-size: 12px; padding: 0 10px; font-weight: bold;
-        }
+        #chat-label { color: #ccc; font-size: 12px; padding: 0 10px; font-weight: bold; }
         #chat-input {
             flex: 1; background: transparent; border: none; color: white; 
-            font-size: 14px; outline: none; font-family: 'Arial', sans-serif;
+            font-size: 14px; outline: none; font-family: 'Verdana', sans-serif;
         }
 
-        /* 3. ЛИДЕРБОРД (Справа сверху) */
+        /* 3. СПИСОК ИГРОКОВ */
         #player-list {
-            position: absolute; top: 0; right: 0; width: 180px;
-            background: rgba(30, 30, 30, 0.8); color: white;
-            border-bottom-left-radius: 5px;
+            position: absolute; top: 0; right: 0; width: 160px;
+            background: rgba(30, 30, 30, 0.8); border: 1px solid #000; color: white;
         }
-        .pl-head { 
-            background: linear-gradient(#555, #333); padding: 6px; 
-            text-align: center; font-weight: bold; font-size: 12px; border-bottom: 1px solid #000;
-        }
-        .pl-row { 
-            padding: 4px 8px; font-size: 12px; display: flex; justify-content: space-between;
-            background: rgba(0,0,0,0.3); margin-bottom: 1px;
-        }
-        
-        /* СКРЫТЬ КУРСОР КОГДА КРУТИШЬ КАМЕРУ */
-        body.rotating { cursor: none; }
+        .pl-head { background: #444; padding: 5px; text-align: center; font-weight: bold; font-size: 12px; }
+        .pl-row { padding: 4px; font-size: 12px; display: flex; justify-content: space-between; border-top: 1px solid #555; }
     </style>
-    
+
+    <!-- THREE.JS -->
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
     </script>
 </head>
 <body>
 
-    <!-- GUI -->
     <div id="gui">
         <div id="player-list">
             <div class="pl-head">Players</div>
-            <div class="pl-row">
-                <span id="my-name">Guest</span> <span style="color:#0f0">100</span>
-            </div>
+            <div class="pl-row"><span id="my-name">Guest</span> <span style="color:lime">100</span></div>
         </div>
-
-        <div id="chat-history">
-            <!-- Сюда падают сообщения -->
-        </div>
-        
+        <div id="chat-history"></div>
         <div id="chat-bar">
             <div id="chat-label">To Chat:</div>
-            <input id="chat-input" type="text" placeholder="Click here or press '/' to chat">
+            <input id="chat-input" type="text" placeholder="Click here or press '/'">
         </div>
     </div>
 
@@ -89,14 +63,13 @@
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-        // --- 1. НАСТРОЙКИ ---
-        const username = localStorage.getItem('ternix_user') || "Player1";
+        // 1. ИНИЦИАЛИЗАЦИЯ
+        const username = localStorage.getItem('ternix_user') || "Player";
         document.getElementById('my-name').innerText = username;
 
-        // --- 2. СЦЕНА ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB); // Классическое небо
-        scene.fog = new THREE.Fog(0x87CEEB, 40, 120);
+        scene.background = new THREE.Color(0x87CEEB); // Небо
+        scene.fog = new THREE.Fog(0x87CEEB, 40, 150);
 
         const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -104,82 +77,88 @@
         document.body.appendChild(renderer.domElement);
 
         // Свет
-        const ambLight = new THREE.AmbientLight(0x888888);
-        scene.add(ambLight);
-        const sun = new THREE.DirectionalLight(0xffffff, 1.2);
-        sun.position.set(50, 100, 50);
-        sun.castShadow = true;
-        scene.add(sun);
+        scene.add(new THREE.AmbientLight(0x999999));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        dirLight.position.set(20, 50, 20);
+        scene.add(dirLight);
 
-        // Baseplate
-        const plate = new THREE.Mesh(new THREE.PlaneGeometry(500, 500), new THREE.MeshStandardMaterial({ color: 0x4a4a4a }));
-        plate.rotation.x = -Math.PI / 2;
-        scene.add(plate);
-        
-        // Сетка (Студы)
-        const grid = new THREE.GridHelper(500, 125, 0x555555, 0x555555);
-        scene.add(grid);
+        // Пол
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), new THREE.MeshStandardMaterial({ color: 0x4a4a4a }));
+        floor.rotation.x = -Math.PI / 2;
+        scene.add(floor);
+        scene.add(new THREE.GridHelper(300, 75, 0x555555, 0x555555));
 
-        // --- 3. ИГРОК ---
+        // 2. ИГРОК
         const player = new THREE.Group();
         scene.add(player);
 
-        // Загрузчик модели
-        const loader = new GLTFLoader();
-        loader.load('Ternix.Guy.glb', (gltf) => {
+        // Загрузка (с фоллбэком на Нуба)
+        new GLTFLoader().load('Ternix.Guy.glb', (gltf) => {
             const model = gltf.scene;
-            model.rotation.y = Math.PI; // Разворот лица
+            model.rotation.y = Math.PI; 
             player.add(model);
         }, undefined, () => {
-            // ФОЛЛБЭК: Если модели нет, делаем "Classic Noob"
-            const head = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshStandardMaterial({color:0xffff00})); head.position.y=4.5;
-            const torso = new THREE.Mesh(new THREE.BoxGeometry(2,2,1), new THREE.MeshStandardMaterial({color:0x0000ff})); torso.position.y=3;
-            const lleg = new THREE.Mesh(new THREE.BoxGeometry(0.9,2,1), new THREE.MeshStandardMaterial({color:0x00aa00})); lleg.position.set(-0.5,1,0);
-            const rleg = new THREE.Mesh(new THREE.BoxGeometry(0.9,2,1), new THREE.MeshStandardMaterial({color:0x00aa00})); rleg.position.set(0.5,1,0);
-            player.add(head, torso, lleg, rleg);
+            // Classic Noob
+            const matY = new THREE.MeshStandardMaterial({color:0xffff00});
+            const matB = new THREE.MeshStandardMaterial({color:0x0000ff});
+            const matG = new THREE.MeshStandardMaterial({color:0x00aa00});
+            
+            const head = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), matY); head.position.y=4.5;
+            const torso = new THREE.Mesh(new THREE.BoxGeometry(2,2,1), matB); torso.position.y=3;
+            const lLeg = new THREE.Mesh(new THREE.BoxGeometry(1,2,1), matG); lLeg.position.set(-0.5,1,0);
+            const rLeg = new THREE.Mesh(new THREE.BoxGeometry(1,2,1), matG); rLeg.position.set(0.5,1,0);
+            player.add(head, torso, lLeg, rLeg);
         });
 
-        // --- 4. УПРАВЛЕНИЕ (CLASSIC ROBLOX) ---
-        // Логика: WASD бегает относительно камеры. ПКМ крутит камеру.
-        
-        let camDist = 12;
-        let camYaw = 0;   // Поворот по горизонтали
-        let camPitch = 0.3; // Поворот по вертикали
-        
-        // Состояние клавиш
-        const keys = { w:false, a:false, s:false, d:false };
-        
-        // Мышь
-        let isRightDown = false;
-        
-        window.addEventListener('mousedown', e => { if(e.button===2) { isRightDown=true; document.body.classList.add('rotating'); } });
-        window.addEventListener('mouseup', e => { if(e.button===2) { isRightDown=false; document.body.classList.remove('rotating'); } });
-        window.addEventListener('contextmenu', e => e.preventDefault()); // Блок меню
+        // 3. УПРАВЛЕНИЕ (ФИЗИКА + КАМЕРА)
+        let camDist = 25; // ОТДАЛИЛ КАМЕРУ (Было 12)
+        let camYaw = 0, camPitch = 0.4;
+        let isLeftDown = false; // ЛЕВАЯ кнопка мыши
 
+        // Физика прыжка
+        let velocityY = 0;
+        let isGrounded = false;
+        const gravity = 0.02;
+        const jumpPower = 0.6;
+
+        // Мышь (ЛКМ для вращения)
+        window.addEventListener('mousedown', e => { if(e.button === 0) isLeftDown = true; }); // 0 = Left Click
+        window.addEventListener('mouseup', e => { if(e.button === 0) isLeftDown = false; });
+        
         window.addEventListener('mousemove', e => {
-            if(isRightDown) {
+            if(isLeftDown) {
                 camYaw -= e.movementX * 0.005;
                 camPitch -= e.movementY * 0.005;
-                // Ограничение вертикали (чтобы не проваливаться под землю)
-                camPitch = Math.max(0.05, Math.min(Math.PI/2 - 0.1, camPitch));
+                camPitch = Math.max(0.1, Math.min(1.5, camPitch)); // Ограничение, чтобы не уходить под землю
             }
         });
-        
-        // Зум
+
+        // Зум (Колесико)
         window.addEventListener('wheel', e => {
-            camDist += e.deltaY * 0.02;
-            camDist = Math.max(4, Math.min(40, camDist));
+            camDist += e.deltaY * 0.05;
+            camDist = Math.max(10, Math.min(60, camDist));
         });
 
         // Клавиши
+        const keys = { w:false, a:false, s:false, d:false };
         document.addEventListener('keydown', e => {
             if(document.activeElement === document.getElementById('chat-input')) return;
+
             if(e.key.toLowerCase() === 'w') keys.w = true;
             if(e.key.toLowerCase() === 's') keys.s = true;
             if(e.key.toLowerCase() === 'a') keys.a = true;
             if(e.key.toLowerCase() === 'd') keys.d = true;
+            
+            // ПРЫЖОК (Пробел)
+            if(e.code === 'Space' && isGrounded) {
+                velocityY = jumpPower;
+                isGrounded = false;
+            }
+            
+            // Чат
             if(e.key === '/') { e.preventDefault(); document.getElementById('chat-input').focus(); }
         });
+        
         document.addEventListener('keyup', e => {
             if(e.key.toLowerCase() === 'w') keys.w = false;
             if(e.key.toLowerCase() === 's') keys.s = false;
@@ -187,59 +166,65 @@
             if(e.key.toLowerCase() === 'd') keys.d = false;
         });
 
-        // --- 5. ФИЗИКА И КАМЕРА ---
+        // --- ИГРОВОЙ ЦИКЛ ---
         function animate() {
             requestAnimationFrame(animate);
 
-            // 1. Движение
-            const speed = 0.15;
-            const moveVec = new THREE.Vector3(0,0,0);
-            
-            // Вектор "Вперед" от камеры (игнорируя наклон вверх/вниз)
-            const forward = new THREE.Vector3(Math.sin(camYaw), 0, Math.cos(camYaw)).normalize();
-            // Вектор "Вправо"
-            const right = new THREE.Vector3(Math.sin(camYaw - Math.PI/2), 0, Math.cos(camYaw - Math.PI/2)).normalize();
+            // 1. Гравитация
+            velocityY -= gravity;
+            player.position.y += velocityY;
 
-            if(keys.w) moveVec.sub(forward);
-            if(keys.s) moveVec.add(forward);
-            if(keys.a) moveVec.sub(right);
-            if(keys.d) moveVec.add(right);
+            // Столкновение с полом
+            if(player.position.y <= 0) {
+                player.position.y = 0;
+                velocityY = 0;
+                isGrounded = true;
+            }
+
+            // 2. Ходьба
+            const moveSpeed = 0.2;
+            // Направление камеры (только по горизонту)
+            const camDir = new THREE.Vector3(Math.sin(camYaw), 0, Math.cos(camYaw)).normalize();
+            const camRight = new THREE.Vector3(Math.sin(camYaw - Math.PI/2), 0, Math.cos(camYaw - Math.PI/2)).normalize();
+            
+            const moveVec = new THREE.Vector3(0,0,0);
+            if(keys.w) moveVec.sub(camDir);
+            if(keys.s) moveVec.add(camDir);
+            if(keys.a) moveVec.sub(camRight);
+            if(keys.d) moveVec.add(camRight);
 
             if(moveVec.length() > 0) {
-                player.position.addScaledVector(moveVec.normalize(), speed);
-                // Поворот модели в сторону бега
+                player.position.addScaledVector(moveVec.normalize(), moveSpeed);
+                // Поворот модели
                 const targetAngle = Math.atan2(moveVec.x, moveVec.z);
-                // Плавный доворот (Lerp угла)
                 let diff = targetAngle - player.rotation.y;
                 while(diff > Math.PI) diff -= Math.PI*2;
                 while(diff < -Math.PI) diff += Math.PI*2;
                 player.rotation.y += diff * 0.2;
             }
 
-            // 2. Позиционирование камеры
-            // Формула сферы: x = r * sin(yaw) * cos(pitch) ...
+            // 3. Камера (Chase)
             const cx = player.position.x + camDist * Math.sin(camYaw) * Math.cos(camPitch);
             const cy = player.position.y + camDist * Math.sin(camPitch);
             const cz = player.position.z + camDist * Math.cos(camYaw) * Math.cos(camPitch);
 
             camera.position.set(cx, cy, cz);
-            camera.lookAt(player.position.clone().add(new THREE.Vector3(0, 2, 0))); // Смотреть на голову
+            camera.lookAt(player.position.clone().add(new THREE.Vector3(0, 3, 0))); // Смотрим чуть выше центра
 
             renderer.render(scene, camera);
         }
         animate();
 
-        // --- 6. ЧАТ ---
-        const chatInput = document.getElementById('chat-input');
-        chatInput.addEventListener('keydown', (e) => {
-            if(e.key === 'Enter' && chatInput.value.trim() !== "") {
-                const msgDiv = document.createElement('div');
-                msgDiv.className = 'chat-msg';
-                // Формат: [Name]: message
-                msgDiv.innerHTML = `[${username}]: ${chatInput.value}`;
-                document.getElementById('chat-history').appendChild(msgDiv);
-                chatInput.value = "";
-                chatInput.blur(); // Снять фокус, чтобы снова ходить
+        // ЧАТ
+        const chatIn = document.getElementById('chat-input');
+        chatIn.addEventListener('keydown', e => {
+            if(e.key === 'Enter' && chatIn.value.trim() !== "") {
+                const d = document.createElement('div');
+                d.className = 'chat-msg';
+                d.innerHTML = `[${username}]: ${chatIn.value}`;
+                document.getElementById('chat-history').appendChild(d);
+                chatIn.value = "";
+                chatIn.blur();
             }
         });
         
@@ -249,7 +234,6 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
-
     </script>
 </body>
 </html>
