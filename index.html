@@ -4,130 +4,149 @@
     <meta charset="UTF-8">
     <title>TerNix - Home (2014)</title>
     <style>
-        /* Стиль 2014 года */
-        body { margin: 0; font-family: 'Verdana', sans-serif; background-color: #e3e3e3; }
+        /* --- ROBLOX 2014 RESET --- */
+        body { margin: 0; font-family: 'Verdana', sans-serif; background-color: #dcdcdc; font-size: 12px; }
+        a { text-decoration: none; color: inherit; }
         
-        /* Шапка */
-        .header {
-            height: 40px; background: #1e1e1e; display: flex; align-items: center; padding: 0 20px;
-            color: white; font-weight: bold; border-bottom: 2px solid white;
-        }
+        /* HEADER */
+        .header-bg { background: url('https://via.placeholder.com/1/1e1e1e'); background-color: #1e1e1e; height: 35px; border-bottom: 1px solid black; color: white; }
+        .header-in { width: 970px; margin: 0 auto; display: flex; align-items: center; height: 100%; justify-content: space-between; }
+        .logo { font-size: 20px; font-weight: 900; border: 1px solid white; padding: 2px 5px; margin-right: 15px; font-family: 'Arial Black', sans-serif; }
         
-        /* Синяя полоса меню */
-        .nav-bar {
-            height: 35px; background: #0074bd; border-bottom: 1px solid #003366;
-            display: flex; align-items: center; padding: 0 20px; color: white;
-            font-size: 14px; box-shadow: 0 3px 5px rgba(0,0,0,0.1);
-        }
-        .nav-link { margin-right: 20px; cursor: pointer; }
-        .nav-link:hover { text-decoration: underline; }
+        /* NAV BAR */
+        .nav-bg { background-color: #0074bd; height: 32px; border-top: 1px solid #FFFFFF; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .nav-in { width: 970px; margin: 0 auto; display: flex; align-items: center; height: 100%; color: white; font-weight: bold; }
+        .nav-item { padding: 0 10px; cursor: pointer; height: 100%; display: flex; align-items: center; }
+        .nav-item:hover { background: rgba(0,0,0,0.1); }
 
-        /* Контент */
-        .container {
-            width: 900px; margin: 20px auto; background: white; border: 1px solid #b8b8b8;
-            min-height: 600px; padding: 20px;
-        }
-
-        /* Игры */
-        .game-card {
-            width: 150px; border: 1px solid #ccc; cursor: pointer; display: inline-block; margin-right: 15px;
-        }
-        .game-card:hover { border: 1px solid #0074bd; }
-        .thumb { width: 100%; height: 100px; background: #555; display: flex; align-items: center; justify-content: center; color: white; }
-        .info { padding: 5px; font-size: 12px; }
-        .g-name { color: #0055b3; font-weight: bold; margin-bottom: 5px; }
-
-        /* --- ОКНО ВХОДА --- */
-        #login-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .login-box {
-            width: 300px; background: white; border: 4px solid #0055b3; padding: 0;
-        }
-        .lb-head { background: #0055b3; color: white; padding: 8px; font-weight: bold; text-align: center; }
-        .lb-body { padding: 20px; text-align: center; }
+        /* MAIN CONTENT */
+        .main-container { width: 970px; margin: 10px auto; display: flex; gap: 10px; }
         
-        input { width: 90%; padding: 5px; margin-bottom: 10px; border: 1px solid #999; }
-        .btn-go { background: #00aa00; color: white; border: 1px solid #006600; padding: 5px 15px; cursor: pointer; font-weight: bold; }
+        /* SIDEBAR (Hello User) */
+        .sidebar { width: 200px; display: flex; flex-direction: column; gap: 10px; }
+        .user-plate { background: white; border: 1px solid #a0a0a0; padding: 5px; text-align: center; }
+        .avatar-thumb { width: 100px; height: 100px; background: #eee; margin: 0 auto; border: 1px solid #ccc; }
         
-        .error-text { color: red; font-size: 11px; margin-bottom: 10px; display: none; }
+        /* GAMES FEED */
+        .content { flex: 1; background: white; border: 1px solid #a0a0a0; min-height: 500px; padding: 10px; }
+        .game-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        
+        /* GAME CARD 2014 */
+        .game-card { width: 160px; border: 1px solid #ccc; cursor: pointer; position: relative; }
+        .game-card:hover { border-color: #0074bd; }
+        .g-thumb { height: 100px; background: #333; color: white; display: flex; justify-content: center; align-items: center; }
+        .g-info { padding: 4px; height: 50px; background: #f8f8f8; }
+        .g-title { color: #0055b3; font-weight: bold; font-size: 11px; margin-bottom: 2px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+        .g-stats { font-size: 10px; color: #666; }
+        .online-tag { position: absolute; top: 0; right: 0; background: #cc0000; color: white; font-size: 9px; padding: 1px 3px; }
+
+        /* CURRENCY */
+        .currency-box { display: flex; gap: 10px; font-size: 11px; font-weight: normal; }
+        .curr-item { display: flex; align-items: center; gap: 3px; }
+        .icon-r { width: 14px; height: 14px; background: green; border-radius: 2px; display: inline-block; } /* Firens */
+        .icon-t { width: 14px; height: 14px; background: #e8b900; border-radius: 50%; display: inline-block; } /* Nex */
+
+        /* LOGIN MODAL */
+        #login-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-box { width: 350px; background: white; border: 4px solid #0055b3; }
+        .m-head { background: #0055b3; color: white; padding: 8px; font-weight: bold; }
+        .m-body { padding: 20px; text-align: center; }
+        input { width: 90%; padding: 6px; margin-bottom: 8px; border: 1px solid #999; }
+        button { background: #00a200; border: 1px solid #006600; color: white; padding: 5px 15px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- LOGIN -->
-    <div id="login-overlay">
-        <div class="login-box">
-            <div class="lb-head">Login to TerNix</div>
-            <div class="lb-body">
-                <input type="text" id="u-name" placeholder="Username (English Only)">
-                <input type="password" id="u-pass" placeholder="Password">
-                <div id="err" class="error-text">Error: English letters & numbers only!</div>
-                <button class="btn-go" onclick="tryLogin()">Play</button>
-            </div>
+<div id="login-modal">
+    <div class="modal-box">
+        <div class="m-head">Login to TerNix</div>
+        <div class="m-body">
+            <p>Welcome back!</p>
+            <input id="u-in" type="text" placeholder="Username (English)">
+            <button onclick="doLogin()">Login</button>
+            <div id="err" style="color:red; font-size:10px; margin-top:5px;"></div>
         </div>
     </div>
+</div>
 
-    <!-- SITE -->
-    <div id="site" style="display:none;">
-        <div class="header">TerNix</div>
-        <div class="nav-bar">
-            <div class="nav-link">Games</div>
-            <div class="nav-link">Catalog</div>
-            <div class="nav-link">Forum</div>
-            <div style="margin-left:auto;">
-                User: <b id="disp-name">Guest</b> | F: 0 | N: 100
-            </div>
+<!-- HEADER -->
+<div class="header-bg">
+    <div class="header-in">
+        <div style="display:flex; align-items:center;">
+            <div class="logo">TERNIX</div>
+            <div>Games &nbsp; Catalog &nbsp; Develop &nbsp; Forum</div>
         </div>
+        <div class="currency-box" id="stats-bar" style="display:none;">
+            <div class="curr-item"><div class="icon-r"></div> <b id="my-firens">0</b> Firens</div>
+            <div class="curr-item"><div class="icon-t"></div> <b id="my-nex">15</b> Nex</div>
+        </div>
+    </div>
+</div>
+<!-- NAV -->
+<div class="nav-bg">
+    <div class="nav-in">
+        <div class="nav-item">Home</div>
+        <div class="nav-item">Profile</div>
+        <div class="nav-item">Messages</div>
+        <div class="nav-item">Friends</div>
+    </div>
+</div>
 
-        <div class="container">
-            <h3>Most Popular</h3>
-            <div class="game-card" onclick="window.location.href='game.html'">
-                <div class="thumb" style="background:#333;">CROSSROADS</div>
-                <div class="info">
-                    <div class="g-name">Crossroads</div>
-                    <div>By Admin</div>
+<!-- BODY -->
+<div class="main-container">
+    <div class="sidebar">
+        <div class="user-plate">
+            <h3>Hello, <span id="u-disp">Guest</span>!</h3>
+            <div class="avatar-thumb"></div>
+        </div>
+    </div>
+    <div class="content">
+        <h2 style="border-bottom:1px solid #ccc; padding-bottom:5px; margin-top:0;">Most Popular</h2>
+        <div class="game-row">
+            <div class="game-card" onclick="startGame()">
+                <div class="online-tag">1.2k Playing</div>
+                <div class="g-thumb" style="background: #500;">CROSSROADS</div>
+                <div class="g-info">
+                    <div class="g-title">Crossroads [Classic]</div>
+                    <div class="g-stats">By Admin</div>
                 </div>
             </div>
             <div class="game-card">
-                <div class="thumb" style="background:#800;">CHAOS</div>
-                <div class="info">
-                    <div class="g-name">Chaos Canyon</div>
-                    <div>By Admin</div>
+                <div class="g-thumb" style="background: #050;">BASEPLATE</div>
+                <div class="g-info">
+                    <div class="g-title">Happy Home</div>
+                    <div class="g-stats">By Admin</div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        function tryLogin() {
-            const user = document.getElementById('u-name').value;
-            const err = document.getElementById('err');
-            
-            // СТРОГАЯ ПРОВЕРКА: Только Английские буквы (A-Z, a-z) и цифры (0-9)
-            // Никаких пробелов, никаких русских букв.
-            const strictRegex = /^[a-zA-Z0-9]+$/;
-
-            if (!strictRegex.test(user)) {
-                err.style.display = 'block';
-                err.innerText = "Only English letters and numbers allowed!";
-                return;
-            }
-            
-            if (user.length < 3) {
-                err.style.display = 'block';
-                err.innerText = "Username too short (min 3 chars).";
-                return;
-            }
-
-            // Если все ок
-            localStorage.setItem('ternix_user', user);
-            document.getElementById('disp-name').innerText = user;
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('site').style.display = 'block';
+<script>
+    function doLogin() {
+        const u = document.getElementById('u-in').value;
+        const regex = /^[a-zA-Z0-9]+$/;
+        if(!regex.test(u)) {
+            document.getElementById('err').innerText = "English Letters/Numbers Only";
+            return;
         }
-    </script>
+        // SAVE USER TO LOCALSTORAGE (Critical for Game.html)
+        localStorage.setItem('ternix_username', u);
+        localStorage.setItem('ternix_firens', 100); 
+        localStorage.setItem('ternix_nex', 50);
+        
+        // UI Update
+        document.getElementById('login-modal').style.display = 'none';
+        document.getElementById('u-disp').innerText = u;
+        document.getElementById('stats-bar').style.display = 'flex';
+        document.getElementById('my-firens').innerText = "100";
+        document.getElementById('my-nex').innerText = "50";
+    }
+
+    function startGame() {
+        // Redirect to game
+        window.location.href = 'game.html';
+    }
+</script>
 </body>
 </html>
-
