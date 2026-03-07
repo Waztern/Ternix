@@ -2,93 +2,103 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TerNix - Home</title>
+    <title>TerNix - Home (2014)</title>
     <style>
-        body { margin: 0; font-family: 'Verdana', sans-serif; background-color: #e3e3e3; }
+        /* ОБЩИЙ СТИЛЬ 2014 */
+        body { margin: 0; font-family: 'Verdana', sans-serif; background-color: #e3e3e3; font-size: 12px; }
         
-        /* ЭКРАН ВХОДА (Отдельный слой) */
-        #login-screen {
-            position: fixed; inset: 0; background: #232323; 
-            display: flex; justify-content: center; align-items: center; z-index: 9999;
+        /* ОКНО ВХОДА (ОТДЕЛЬНОЕ) */
+        #login-overlay {
+            position: fixed; inset: 0; background: #2d2d2d; z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
         }
         .login-box {
-            width: 300px; background: white; border: 1px solid #999; padding: 5px;
+            width: 320px; background: white; border: 1px solid #000;
         }
         .lb-header {
-            background: linear-gradient(to bottom, #0074bd, #0055b3);
-            color: white; padding: 8px; font-weight: bold; font-size: 14px; border: 1px solid #003366;
+            background: linear-gradient(#0074bd, #0055b3);
+            padding: 8px; color: white; font-weight: bold; border-bottom: 1px solid #003366;
         }
-        .lb-content { border: 1px solid #aaa; padding: 20px; text-align: center; background: #eee; }
-        input { display: block; width: 90%; margin: 10px auto; padding: 5px; }
+        .lb-body { padding: 20px; background: #f2f2f2; text-align: center; }
+        
+        input { display: block; width: 90%; margin: 5px auto; padding: 6px; border: 1px solid #aaa; }
         button {
-            background: linear-gradient(to bottom, #66cc00, #008800);
-            color: white; font-weight: bold; border: 1px solid #005500;
-            padding: 5px 20px; cursor: pointer;
+            margin-top: 10px; padding: 6px 20px; cursor: pointer; font-weight: bold;
+            background: linear-gradient(#66cc00, #449900); color: white; border: 1px solid #005500;
         }
-
-        /* САЙТ (Скрыт до входа) */
-        #site-container { display: none; }
-
-        /* ШАПКА 2014 */
-        .header { height: 34px; background: #1e1e1e; border-bottom: 1px solid white; display: flex; align-items: center; color: white; padding: 0 100px; font-size: 12px; }
-        .nav-blue { height: 30px; background: #0074bd; border-top: 1px solid #ffffff; border-bottom: 1px solid #003366; display: flex; align-items: center; padding: 0 100px; color: white; font-weight: bold; font-size: 13px; gap: 20px; }
         
-        .content { width: 900px; margin: 20px auto; background: white; border: 1px solid #aaa; min-height: 600px; padding: 15px; }
+        /* САЙТ */
+        #site { display: none; } /* Скрыт до входа */
         
-        .game-card { width: 150px; border: 1px solid #ccc; cursor: pointer; }
-        .game-thumb { width: 150px; height: 100px; background: #555; }
-        .game-title { color: #0055b3; font-weight: bold; font-size: 12px; padding: 4px; }
-        .game-maker { font-size: 10px; color: #666; padding: 0 4px 4px; }
+        .header { height: 35px; background: #1e1e1e; color: white; display: flex; align-items: center; padding: 0 50px; border-bottom: 1px solid white; }
+        .nav { height: 30px; background: #0074bd; display: flex; align-items: center; padding: 0 50px; color: white; font-weight: bold; border-bottom: 2px solid #003366; gap: 20px; }
+        
+        .container { width: 900px; margin: 15px auto; background: white; border: 1px solid #aaa; min-height: 600px; padding: 15px; }
+        .stat-bar { float: right; font-size: 11px; }
+        
+        .game-card {
+            width: 160px; border: 1px solid #ccc; display: inline-block; margin-right: 10px; cursor: pointer;
+        }
+        .game-card:hover { border-color: #0074bd; }
+        .thumb { height: 100px; background: #555; }
+        .info { padding: 5px; }
+        .g-title { color: #0055b3; font-weight: bold; font-size: 13px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
 
-    <!-- 1. ВХОД -->
-    <div id="login-screen">
+    <!-- ВХОД -->
+    <div id="login-overlay">
         <div class="login-box">
             <div class="lb-header">Login to TerNix</div>
-            <div class="lb-content">
+            <div class="lb-body">
                 <input id="u-name" placeholder="Username">
-                <button onclick="login()">Login</button>
-                <div id="error" style="color:red; font-size:10px; margin-top:5px;"></div>
+                <input id="u-pass" type="password" placeholder="Password">
+                <button onclick="doLogin()">Login</button>
+                <div id="err" style="color:red; margin-top:5px; font-size:10px;"></div>
             </div>
         </div>
     </div>
 
-    <!-- 2. САЙТ -->
-    <div id="site-container">
+    <!-- ГЛАВНАЯ -->
+    <div id="site">
         <div class="header">
-            <div style="font-weight:900; font-size:18px; margin-right:20px;">TERNIX</div>
-            <div style="flex:1;"></div>
-            <div id="user-stats">User: Guest | Firens: 0 | Nex: 0</div>
+            <span style="font-size:18px; font-weight:900;">TERNIX</span>
+            <div style="flex:1"></div>
+            <div class="stat-bar">
+                User: <b id="disp-name">Guest</b> | Firens: 100 | Nex: 10
+            </div>
         </div>
-        <div class="nav-blue">
-            <div>Games</div> <div>Catalog</div> <div>People</div> <div>Forum</div>
+        <div class="nav">
+            <div>Games</div> <div>Catalog</div> <div>Develop</div> <div>Forum</div>
         </div>
-        <div class="content">
+        <div class="container">
             <h3>Games</h3>
             <div class="game-card" onclick="window.location.href='game.html'">
-                <div class="game-thumb"></div>
-                <div class="game-title">TerNix Place</div>
-                <div class="game-maker">By Admin</div>
+                <div class="thumb"></div>
+                <div class="info">
+                    <div class="g-title">TerNix Place</div>
+                    <div style="font-size:10px; color:#666;">By Admin</div>
+                    <div style="font-size:10px; color:green;">12 Playing</div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        function login() {
+        function doLogin() {
             const u = document.getElementById('u-name').value;
-            const regex = /^[a-zA-Z0-9]+$/;
-            if (!regex.test(u)) {
-                document.getElementById('error').innerText = "English Only!";
-                return;
-            }
-            
-            // Сохраняем и переключаем экран
+            const p = document.getElementById('u-pass').value;
+            const err = document.getElementById('err');
+
+            if(u.length < 3) { err.innerText = "Username too short"; return; }
+            if(p.length === 0) { err.innerText = "Enter a password!"; return; } // Проверка пароля
+
+            // Успех
             localStorage.setItem('ternix_user', u);
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('site-container').style.display = 'block';
-            document.getElementById('user-stats').innerText = `User: ${u} | Firens: 100 | Nex: 15`;
+            document.getElementById('disp-name').innerText = u;
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('site').style.display = 'block';
         }
     </script>
 </body>
