@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <title>TerNix - Home (2014)</title>
     <style>
-        /* ОБЩИЙ СТИЛЬ 2014 */
         body { margin: 0; font-family: 'Verdana', sans-serif; background-color: #e3e3e3; font-size: 12px; }
         
-        /* ОКНО ВХОДА (ОТДЕЛЬНОЕ) */
         #login-overlay {
             position: fixed; inset: 0; background: #2d2d2d; z-index: 9999;
             display: flex; justify-content: center; align-items: center;
@@ -27,8 +25,7 @@
             background: linear-gradient(#66cc00, #449900); color: white; border: 1px solid #005500;
         }
         
-        /* САЙТ */
-        #site { display: none; } /* Скрыт до входа */
+        #site { display: none; }
         
         .header { height: 35px; background: #1e1e1e; color: white; display: flex; align-items: center; padding: 0 50px; border-bottom: 1px solid white; }
         .nav { height: 30px; background: #0074bd; display: flex; align-items: center; padding: 0 50px; color: white; font-weight: bold; border-bottom: 2px solid #003366; gap: 20px; }
@@ -47,7 +44,6 @@
 </head>
 <body>
 
-    <!-- ВХОД -->
     <div id="login-overlay">
         <div class="login-box">
             <div class="lb-header">Login to TerNix</div>
@@ -60,7 +56,6 @@
         </div>
     </div>
 
-    <!-- ГЛАВНАЯ -->
     <div id="site">
         <div class="header">
             <span style="font-size:18px; font-weight:900;">TERNIX</span>
@@ -86,7 +81,6 @@
     </div>
 
     <script>
-        // Функция обновления отображения валют на главной
         function updateCurrencies() {
             const firens = parseInt(localStorage.getItem('ternix_firens') || '0');
             const nex = parseInt(localStorage.getItem('ternix_nex') || '100');
@@ -94,7 +88,6 @@
             document.getElementById('disp-nex').innerText = nex;
         }
 
-        // Проверка при загрузке: если пользователь уже залогинен, показываем сайт
         (function checkLogin() {
             const savedUser = localStorage.getItem('ternix_user');
             if (savedUser) {
@@ -113,9 +106,7 @@
             if(u.length < 3) { err.innerText = "Username too short"; return; }
             if(p.length === 0) { err.innerText = "Enter a password!"; return; }
 
-            // Сохраняем пользователя
             localStorage.setItem('ternix_user', u);
-            // Если валюты ещё не установлены, ставим начальные
             if (!localStorage.getItem('ternix_firens')) {
                 localStorage.setItem('ternix_firens', '0');
             }
