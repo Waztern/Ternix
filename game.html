@@ -2,82 +2,129 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TerNix — игра</title>
+    <title>TerNix — 2014 Classic</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Arial', sans-serif; user-select: none; }
+        body { margin: 0; overflow: hidden; font-family: 'Verdana', 'Arial', sans-serif; user-select: none; }
         
+        /* GUI: все элементы поверх игры */
         #gui { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
 
-        /* -------------------- Верхняя панель -------------------- */
-        #top-panel {
-            position: absolute; top: 10px; left: 10px; right: 10px;
-            display: flex; align-items: center; gap: 15px;
+        /* ========== СТИЛЬ 2014 ========== */
+        .window-2014 {
+            background: linear-gradient(#f0f0f0, #c0c0c0);
+            border: 2px solid #000;
+            border-radius: 8px;
+            box-shadow: 3px 3px 0px rgba(0,0,0,0.5);
+            font-weight: bold;
+            color: black;
             pointer-events: auto;
+            padding: 6px;
         }
+
         /* Красная кнопка Exit */
         #exit-btn {
-            background: #d32f2f; color: white; font-weight: bold;
-            padding: 8px 20px; border-radius: 6px; border: 2px solid #b71c1c;
-            cursor: pointer; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            transition: 0.2s;
+            position: absolute; top: 10px; left: 10px;
+            background: linear-gradient(#ff4d4d, #b30000);
+            border: 2px solid #660000;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            padding: 8px 20px;
+            cursor: pointer;
+            box-shadow: 2px 2px 0 #000;
+            text-shadow: 1px 1px 0 #000;
+            pointer-events: auto;
         }
-        #exit-btn:hover { background: #f44336; }
+        #exit-btn:hover { background: linear-gradient(#ff6666, #cc0000); }
+
         /* Зелёный бар здоровья */
-        #health-bar-container {
-            background: #333; border-radius: 12px; border: 2px solid #000;
-            width: 200px; height: 24px; overflow: hidden;
+        #health-container {
+            position: absolute; top: 10px; left: 130px;
+            width: 200px; height: 30px;
+            background: #333;
+            border: 2px solid #000;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 2px 2px 0 #000;
+            pointer-events: auto;
         }
         #health-bar {
-            background: #4caf50; width: 100%; height: 100%;
-            transition: width 0.2s;
+            height: 100%; width: 100%;
+            background: linear-gradient(#7cfc00, #32cd32);
         }
+
         /* Жёлтая таблица игроков (справа) */
         #player-list {
-            margin-left: auto; /* прижимаем вправо */
-            background: #ffeb3b; color: #000; font-weight: bold;
-            border: 3px solid #ff9800; border-radius: 8px;
-            width: 160px; padding: 5px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            position: absolute; top: 10px; right: 10px;
+            width: 180px;
+            background: linear-gradient(#ffd700, #ffb347);
+            border: 2px solid #b8860b;
+            border-radius: 8px;
+            box-shadow: 3px 3px 0 #000;
+            font-weight: bold;
+            pointer-events: auto;
         }
         .pl-head {
-            background: #ff9800; padding: 6px; text-align: center;
-            font-size: 16px; border-bottom: 2px solid #e65100;
+            background: linear-gradient(#ffaa00, #cc8400);
+            padding: 8px; text-align: center; font-size: 16px;
+            border-bottom: 2px solid #8b5a00;
+            color: #000;
+            text-shadow: 1px 1px 0 #ffd700;
         }
         .pl-row {
-            padding: 4px 10px; font-size: 14px;
-            border-bottom: 1px solid #f57c00;
+            padding: 6px 10px; font-size: 14px;
+            border-bottom: 1px solid #cc8400;
+            color: #000;
         }
         .pl-row:last-child { border-bottom: none; }
 
-        /* -------------------- Чат (синяя панель) -------------------- */
-        #chat-container {
+        /* Синяя панель чата (внизу слева) */
+        #chat-panel {
             position: absolute; bottom: 10px; left: 10px;
-            width: 450px; background: rgba(33, 150, 243, 0.85); /* синий полупрозрачный */
-            border: 3px solid #0d47a1; border-radius: 8px;
-            pointer-events: auto; padding: 6px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.7);
+            width: 450px;
+            background: linear-gradient(#1e90ff, #104e8b);
+            border: 3px solid #0a2f6a;
+            border-radius: 10px;
+            box-shadow: 4px 4px 0 #000;
+            padding: 8px;
+            pointer-events: auto;
         }
         #chat-history {
-            height: 200px; overflow-y: auto;
-            color: white; font-size: 16px; font-weight: bold;
-            text-shadow: 1px 1px 0 #000;
-            padding: 5px; background: rgba(0,0,0,0.3);
-            border-radius: 4px;
+            height: 150px; overflow-y: auto;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid #0a2f6a;
+            border-radius: 6px;
+            padding: 5px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #000;
+            font-size: 16px;
         }
         .chat-msg { margin: 2px 0; }
         #chat-input-area {
-            display: flex; margin-top: 6px;
+            display: flex; margin-top: 8px;
         }
         #chat-label {
-            background: #0d47a1; color: white; font-weight: bold;
-            padding: 5px 10px; border-radius: 4px 0 0 4px;
+            background: #0a2f6a; color: white; font-weight: bold;
+            padding: 6px 12px; border-radius: 6px 0 0 6px;
+            border: 1px solid #000;
+            text-shadow: 1px 1px 0 #000;
         }
         #chat-input {
-            flex: 1; background: white; border: none; padding: 5px 10px;
-            font-size: 16px; outline: none; border-radius: 0 4px 4px 0;
+            flex: 1; background: white; border: 2px solid #0a2f6a;
+            border-left: none; padding: 6px 10px; font-size: 16px;
+            outline: none; border-radius: 0 6px 6px 0;
+            font-family: 'Verdana', sans-serif;
         }
-        #chat-input:disabled {
-            background: #ccc; color: #666;
+        #chat-input:disabled { background: #ccc; }
+
+        /* Надпись "Make by: Waztern" */
+        #credits {
+            position: absolute; bottom: 10px; right: 10px;
+            background: rgba(0,0,0,0.5); color: white; font-size: 12px;
+            padding: 4px 8px; border-radius: 4px; border: 1px solid #888;
+            font-style: italic; pointer-events: auto;
         }
     </style>
 
@@ -88,38 +135,39 @@
 <body>
 
     <div id="gui">
-        <!-- Верхняя панель с кнопкой Exit, здоровьем и списком игроков -->
-        <div id="top-panel">
-            <div id="exit-btn">Exit</div>
-            <div id="health-bar-container">
-                <div id="health-bar" style="width:100%"></div>
-            </div>
-            <div id="player-list">
-                <div class="pl-head">Игроки</div>
-                <div class="pl-row" id="my-name-row">Загрузка...</div>
-                <!-- Другие игроки будут добавляться сюда динамически (для будущего мультиплеера) -->
-            </div>
+        <!-- Красная кнопка Exit -->
+        <div id="exit-btn">Exit</div>
+
+        <!-- Зелёный бар здоровья -->
+        <div id="health-container">
+            <div id="health-bar"></div>
         </div>
 
-        <!-- Синяя панель чата -->
-        <div id="chat-container">
+        <!-- Жёлтая таблица игроков -->
+        <div id="player-list">
+            <div class="pl-head">Players</div>
+            <div class="pl-row" id="my-name-row">Загрузка...</div>
+        </div>
+
+        <!-- Синий чат -->
+        <div id="chat-panel">
             <div id="chat-history"></div>
             <div id="chat-input-area">
                 <div id="chat-label">Say:</div>
                 <input id="chat-input" type="text" disabled>
             </div>
         </div>
+
+        <!-- Надпись "Make by: Waztern" -->
+        <div id="credits">Make by: Waztern</div>
     </div>
 
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-        // --- Загрузка данных пользователя и валют ---
+        // --- Данные игрока ---
         const username = localStorage.getItem('ternix_user') || "Player1";
-        let firens = parseInt(localStorage.getItem('ternix_firens') || '0');
-        let nex = parseInt(localStorage.getItem('ternix_nex') || '100');
-
         // Цвет ника (для чата)
         function getNameColor(name) {
             let hash = 0;
@@ -130,17 +178,14 @@
             return "#" + "00000".substring(0, 6 - c.length) + c;
         }
         const myColor = getNameColor(username);
-
-        // Отображаем имя в списке игроков
         document.getElementById('my-name-row').innerText = username;
-        document.getElementById('my-name-row').style.color = '#000'; // жёлтая панель — чёрный текст
 
         // --- Кнопка Exit ---
         document.getElementById('exit-btn').addEventListener('click', () => {
             window.location.href = 'index.html';
         });
 
-        // --- Сцена ---
+        // --- Сцена THREE.JS ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB);
         scene.fog = new THREE.Fog(0x87CEEB, 50, 150);
@@ -156,13 +201,13 @@
         sun.position.set(50, 100, 50);
         scene.add(sun);
 
-        // Зелёный Baseplate
+        // Пол (Baseplate)
         const baseplateMat = new THREE.MeshStandardMaterial({ color: 0x4CAF50 });
         const baseplate = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), baseplateMat);
         baseplate.rotation.x = -Math.PI / 2;
         scene.add(baseplate);
 
-        // Сетка для ориентира (можно убрать, если мешает)
+        // Сетка для ориентира (можно оставить, но она полупрозрачная)
         scene.add(new THREE.GridHelper(400, 100, 0x666666, 0x555555));
 
         // --- Игрок (модель) ---
@@ -171,7 +216,8 @@
 
         new GLTFLoader().load('Ternix.Guy.glb', (gltf) => {
             const model = gltf.scene;
-            model.rotation.y = Math.PI; 
+            // Поворачиваем модель один раз, чтобы она смотрела в нужную сторону (например, вдоль +Z)
+            model.rotation.y = Math.PI; // или 0, зависит от ориентации модели
             player.add(model);
         }, undefined, () => {
             // Заглушка-кубик, если модель не загрузится
@@ -185,9 +231,10 @@
             player.add(head, torso, lLeg, rLeg);
         });
 
-        // --- Управление (ИСПРАВЛЕНО: W — вперёд, S — назад, A — влево, D — вправо) ---
+        // --- Управление (классическое: W - вперёд, S - назад, A - влево, D - вправо, без поворота персонажа) ---
         let camDist = 20;
-        let camYaw = 0, camPitch = 0.5;
+        let camYaw = 0;          // горизонтальный угол камеры
+        let camPitch = 0.5;       // вертикальный угол
         let isLeftDown = false;
         let velocityY = 0;
         let isGrounded = false;
@@ -211,7 +258,7 @@
         document.addEventListener('keydown', e => {
             const chatInput = document.getElementById('chat-input');
             
-            // Если чат активен (поле не disabled)
+            // Если чат активен
             if(!chatInput.disabled) {
                 if(e.code === 'Enter') {
                     e.preventDefault();
@@ -224,7 +271,7 @@
                 return;
             }
 
-            // Чат неактивен — движение
+            // Движение (WASD) — переназначим правильно
             if(e.code === 'KeyW') keys.w = true;
             if(e.code === 'KeyS') keys.s = true;
             if(e.code === 'KeyA') keys.a = true;
@@ -248,7 +295,7 @@
             if(e.code === 'KeyD') keys.d = false;
         });
 
-        // --- Физика и анимация ---
+        // --- Физика и анимация (без поворота персонажа) ---
         function animate() {
             requestAnimationFrame(animate);
 
@@ -265,7 +312,7 @@
             const camDir = new THREE.Vector3(Math.sin(camYaw), 0, Math.cos(camYaw)).normalize();
             const camRight = new THREE.Vector3(Math.sin(camYaw - Math.PI/2), 0, Math.cos(camYaw - Math.PI/2)).normalize();
             
-            // ИСПРАВЛЕНО: W — вперёд (+camDir), S — назад (-camDir), A — влево (-camRight), D — вправо (+camRight)
+            // Вперёд (W) = camDir, назад (S) = -camDir, влево (A) = -camRight, вправо (D) = camRight
             const move = new THREE.Vector3(0,0,0);
             if(keys.w) move.add(camDir);
             if(keys.s) move.sub(camDir);
@@ -274,15 +321,10 @@
 
             if(move.length() > 0) {
                 player.position.addScaledVector(move.normalize(), 0.2);
-                // Плавный поворот модели в сторону движения
-                const targetAngle = Math.atan2(move.x, move.z);
-                let diff = targetAngle - player.rotation.y;
-                while(diff > Math.PI) diff -= Math.PI*2;
-                while(diff < -Math.PI) diff += Math.PI*2;
-                player.rotation.y += diff * 0.15;
+                // Модель НЕ ПОВОРАЧИВАЕМ, оставляем как есть
             }
 
-            // Камера
+            // Камера (вид от третьего лица)
             const cx = player.position.x + camDist * Math.sin(camYaw) * Math.cos(camPitch);
             const cy = player.position.y + camDist * Math.sin(camPitch);
             const cz = player.position.z + camDist * Math.cos(camYaw) * Math.cos(camPitch);
@@ -293,7 +335,7 @@
         }
         animate();
 
-        // --- Логика чата (синяя панель) ---
+        // --- Чат (синий) ---
         const chatInput = document.getElementById('chat-input');
         const chatHist = document.getElementById('chat-history');
 
@@ -319,7 +361,7 @@
                 chatHist.scrollTop = chatHist.scrollHeight;
             }
             chatInput.value = "";
-            // Чат остаётся активным для следующего сообщения
+            // Оставляем чат активным
         }
 
         // Обработчик Enter на поле ввода
