@@ -2,33 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TerNix Player (Fixed No-CORS)</title>
+    <title>TerNix Player (Fixed)</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Arial', sans-serif; user-select: none; background: #000; }
+        body { margin: 0; overflow: hidden; font-family: 'Arial', sans-serif; user-select: none; }
         #gui { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
         #chat-history {
-            position: absolute; top: 10px; left: 10px; width: 450px; height: 250px;
+            position: absolute; top: 10px; left: 10px; width: 500px; height: 350px;
             display: flex; flex-direction: column; justify-content: flex-end;
             overflow: hidden; font-size: 18px; font-weight: bold;
             text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
         }
         .chat-msg { margin-bottom: 4px; color: white; }
         #chat-bar {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 35px;
-            background: rgba(0, 0, 0, 0.8); border-top: 1px solid #555;
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 32px;
+            background: rgba(0, 0, 0, 0.8); border-top: 1px solid #666;
             pointer-events: auto; display: none; align-items: center;
         }
         #chat-bar.active { display: flex; }
-        #chat-label { color: #00a2ff; font-weight: bold; padding: 0 10px; }
+        #chat-label { color: #00a2ff; font-weight: bold; padding: 0 10px; font-size: 14px; }
         #chat-input { flex: 1; background: transparent; border: none; color: white; font-size: 16px; outline: none; }
         #player-list {
             position: absolute; top: 0; right: 0; width: 180px;
-            background: rgba(30, 30, 30, 0.9); color: white; border-bottom-left-radius: 6px;
+            background: rgba(30, 30, 30, 0.9); border: 1px solid #000; color: white; border-bottom-left-radius: 6px;
         }
-        .pl-row { padding: 5px 10px; font-size: 14px; display: flex; justify-content: space-between; }
+        .pl-head { background: linear-gradient(#555, #333); padding: 6px; text-align: center; font-weight: bold; }
+        .pl-row { padding: 5px 10px; font-size: 14px; display: flex; justify-content: space-between; border-top: 1px solid #555; }
     </style>
 
-    <!-- ИСПОЛЬЗУЕМ КЛАССИЧЕСКИЕ СКРИПТЫ ДЛЯ ИЗБЕЖАНИЯ CORS ОШИБОК -->
+    <!-- ПОДКЛЮЧАЕМ НАПРЯМУЮ, ЧТОБЫ НЕ БЫЛО ОШИБОК THREE IS NOT DEFINED -->
     <script src="https://cdnjs.cloudflare.com"></script>
     <script src="https://cdn.jsdelivr.net"></script>
 </head>
@@ -36,107 +37,111 @@
 
     <div id="gui">
         <div id="player-list">
-            <div style="background:#444; padding:5px; text-align:center;">Players</div>
+            <div class="pl-head">Players</div>
             <div class="pl-row"><span id="my-name-list">Guest</span> <span style="color:lime">100</span></div>
         </div>
         <div id="chat-history"></div>
         <div id="chat-bar">
             <div id="chat-label">Say:</div>
-            <input id="chat-input" type="text" maxlength="100">
+            <input id="chat-input" type="text">
         </div>
     </div>
 
     <script>
-        // ИНИЦИАЛИЗАЦИЯ
-        const username = localStorage.getItem('ternix_user') || "Guest";
+        // 1. ИНИЦИАЛИЗАЦИЯ
+        const username = localStorage.getItem('ternix_user') || "Player1";
         const myColor = "#00a2ff";
         document.getElementById('my-name-list').innerText = username;
 
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB);
-        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
         const sun = new THREE.DirectionalLight(0xffffff, 1);
         sun.position.set(50, 100, 50);
         scene.add(sun);
 
-        const floor = new THREE.Mesh(new THREE.PlaneBufferGeometry(400, 400), new THREE.MeshStandardMaterial({ color: 0x4a4a4a }));
+        // ПОЛ И ПРЕДМЕТЫ
+        const floor = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: 0x4a4a4a }));
         floor.rotation.x = -Math.PI / 2;
         scene.add(floor);
         scene.add(new THREE.GridHelper(400, 100, 0x000000, 0x555555));
 
-        // Добавляем тестовый куб
-        const box = new THREE.Mesh(new THREE.BoxGeometry(4,4,4), new THREE.MeshStandardMaterial({color:0xff0000}));
-        box.position.set(15, 2, -15);
-        scene.add(box);
+        // Добавляем пару предметов
+        const box = new THREE.Mesh(new THREE.BoxGeometry(5, 5, 5), new THREE.MeshStandardMaterial({color: 0xff0000}));
+        box.position.set(20, 2.5, -20); scene.add(box);
+        const spawnPart = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 0.5), new THREE.MeshStandardMaterial({color: 0x00ff00}));
+        spawnPart.position.set(0, 0.25, 0); scene.add(spawnPart);
 
         const player = new THREE.Group();
         scene.add(player);
 
-        // ЗАГРУЗКА МОДЕЛИ
+        // ЗАГРУЗКА
         const loader = new THREE.GLTFLoader();
         loader.load('Ternix.Guy.glb', (gltf) => {
             player.add(gltf.scene);
         }, undefined, () => {
-            // Если модель не найдена — создаем заглушку
-            const head = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), new THREE.MeshStandardMaterial({color:0xffff00}));
-            head.position.y = 4;
+            const head = new THREE.Mesh(new THREE.BoxGeometry(1.2,1.2,1.2), new THREE.MeshStandardMaterial({color:0xffff00}));
+            head.position.y = 4; player.add(head);
             const body = new THREE.Mesh(new THREE.BoxGeometry(2,2,1), new THREE.MeshStandardMaterial({color:0x0000ff}));
-            body.position.y = 2.5;
-            player.add(head, body);
+            body.position.y = 2.5; player.add(body);
         });
 
+        // ПЕРЕМЕННЫЕ УПРАВЛЕНИЯ
         let camDist = 20, camYaw = 0, camPitch = 0.5;
         let isMouseDown = false;
-        const keys = { w:0, a:0, s:0, d:0 };
+        const keys = { w:false, a:false, s:false, d:false };
         let vy = 0, onGround = true;
 
-        // УПРАВЛЕНИЕ И ЧАТ
+        // СОБЫТИЯ КЛАВИАТУРЫ
         window.addEventListener('keydown', e => {
             if(document.activeElement.id === 'chat-input') {
                 if(e.code === 'Enter') sendChat();
                 if(e.code === 'Escape') closeChat();
                 return;
             }
-            if(e.code === 'Slash') { e.preventDefault(); openChat(); }
-            if(e.code === 'KeyW') keys.w = 1; if(e.code === 'KeyS') keys.s = 1;
-            if(e.code === 'KeyA') keys.a = 1; if(e.code === 'KeyD') keys.d = 1;
+            if(e.code === 'KeyW') keys.w = true;
+            if(e.code === 'KeyS') keys.s = true;
+            if(e.code === 'KeyA') keys.a = true;
+            if(e.code === 'KeyD') keys.d = true;
             if(e.code === 'Space' && onGround) { vy = 0.6; onGround = false; }
+            if(e.code === 'Slash') { e.preventDefault(); openChat(); }
         });
 
         window.addEventListener('keyup', e => {
-            if(e.code === 'KeyW') keys.w = 0; if(e.code === 'KeyS') keys.s = 0;
-            if(e.code === 'KeyA') keys.a = 0; if(e.code === 'KeyD') keys.d = 0;
+            if(e.code === 'KeyW') keys.w = false;
+            if(e.code === 'KeyS') keys.s = false;
+            if(e.code === 'KeyA') keys.a = false;
+            if(e.code === 'KeyD') keys.d = false;
         });
 
         window.addEventListener('mousedown', () => isMouseDown = true);
         window.addEventListener('mouseup', () => isMouseDown = false);
         window.addEventListener('mousemove', e => {
-            if(isMouseDown) { camYaw -= e.movementX * 0.005; camPitch = Math.max(0.1, Math.min(1.4, camPitch - e.movementY * 0.005)); }
+            if(isMouseDown) { camYaw -= e.movementX * 0.007; camPitch = Math.max(0.1, Math.min(1.4, camPitch - e.movementY * 0.007)); }
         });
 
+        // ФУНКЦИИ ЧАТА
         function openChat() {
-            document.getElementById('chat-bar').classList.add('active');
+            document.getElementById('chat-bar').style.display = 'flex';
             document.getElementById('chat-input').focus();
-            keys.w = keys.a = keys.s = keys.d = 0;
+            keys.w = keys.a = keys.s = keys.d = false; // Стоп при чате
         }
-
         function closeChat() {
-            document.getElementById('chat-bar').classList.remove('active');
+            document.getElementById('chat-bar').style.display = 'none';
             document.getElementById('chat-input').blur();
             document.getElementById('chat-input').value = "";
         }
-
         function sendChat() {
-            const text = document.getElementById('chat-input').value.trim();
-            if(text) {
+            const val = document.getElementById('chat-input').value.trim();
+            if(val) {
                 const msg = document.createElement('div');
                 msg.className = 'chat-msg';
-                msg.innerHTML = `<span style="color:${myColor}">[${username}]:</span> ${text}`;
+                msg.innerHTML = `<span style="color:${myColor}">[${username}]:</span> ${val}`;
                 const hist = document.getElementById('chat-history');
                 hist.appendChild(msg);
                 hist.scrollTop = hist.scrollHeight;
@@ -144,14 +149,15 @@
             closeChat();
         }
 
+        // ОСНОВНОЙ ЦИКЛ
         function animate() {
             requestAnimationFrame(animate);
 
-            // Физика прыжка
+            // Прыжки
             vy -= 0.025; player.position.y += vy;
             if(player.position.y < 0) { player.position.y = 0; vy = 0; onGround = true; }
 
-            // Движение и плавный поворот
+            // Движение (относительно камеры)
             const move = new THREE.Vector3();
             const forward = new THREE.Vector3(Math.sin(camYaw), 0, Math.cos(camYaw));
             const right = new THREE.Vector3(Math.sin(camYaw - Math.PI/2), 0, Math.cos(camYaw - Math.PI/2));
@@ -161,7 +167,8 @@
 
             if(move.length() > 0) {
                 move.normalize();
-                player.position.addScaledVector(move, 0.2);
+                player.position.addScaledVector(move, 0.25);
+                // ПЛАВНЫЙ ПОВОРОТ
                 const targetAngle = Math.atan2(move.x, move.z) + Math.PI;
                 let diff = targetAngle - player.rotation.y;
                 while(diff < -Math.PI) diff += Math.PI*2;
@@ -169,7 +176,7 @@
                 player.rotation.y += diff * 0.15;
             }
 
-            // Камера
+            // КАМЕРА
             camera.position.set(
                 player.position.x + Math.sin(camYaw) * camDist * Math.cos(camPitch),
                 player.position.y + Math.sin(camPitch) * camDist + 3,
@@ -181,8 +188,7 @@
         animate();
 
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
+            camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
     </script>
