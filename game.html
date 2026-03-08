@@ -2,195 +2,289 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TerNix Player (Fixed)</title>
+    <title>TerNix Player (RU Fix)</title>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Arial', sans-serif; user-select: none; }
+        
+        /* --- GUI --- */
         #gui { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+
+        /* 1. ЧАТ ИСТОРИЯ (Поднял выше) */
         #chat-history {
             position: absolute; top: 10px; left: 10px; width: 500px; height: 350px;
-            display: flex; flex-direction: column; justify-content: flex-end;
-            overflow: hidden; font-size: 18px; font-weight: bold;
+            display: flex; flex-direction: column; justify-content: flex-start; /* Сообщения сверху */
+            overflow: hidden;
+            font-size: 18px; font-weight: bold;
+            /* Классическая жирная обводка */
             text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
         }
         .chat-msg { margin-bottom: 4px; color: white; }
+
+        /* 2. СТРОКА ВВОДА (Снизу) */
         #chat-bar {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 32px;
             background: rgba(0, 0, 0, 0.8); border-top: 1px solid #666;
-            pointer-events: auto; display: none; align-items: center;
+            pointer-events: auto; display: flex; align-items: center;
+            visibility: hidden; /* Скрыто пока не нажмешь / */
         }
-        #chat-bar.active { display: flex; }
+        #chat-bar.active { visibility: visible; }
+        
         #chat-label { color: #00a2ff; font-weight: bold; padding: 0 10px; font-size: 14px; }
-        #chat-input { flex: 1; background: transparent; border: none; color: white; font-size: 16px; outline: none; }
+        #chat-input {
+            flex: 1; background: transparent; border: none; color: white; 
+            font-size: 16px; outline: none; font-family: 'Arial', sans-serif;
+        }
+
+        /* 3. СПИСОК ИГРОКОВ */
         #player-list {
             position: absolute; top: 0; right: 0; width: 180px;
-            background: rgba(30, 30, 30, 0.9); border: 1px solid #000; color: white; border-bottom-left-radius: 6px;
+            background: rgba(30, 30, 30, 0.9); border: 1px solid #000; color: white;
+            border-bottom-left-radius: 6px;
         }
         .pl-head { background: linear-gradient(#555, #333); padding: 6px; text-align: center; font-weight: bold; }
         .pl-row { padding: 5px 10px; font-size: 14px; display: flex; justify-content: space-between; border-top: 1px solid #555; }
     </style>
 
-    <!-- ПОДКЛЮЧАЕМ НАПРЯМУЮ, ЧТОБЫ НЕ БЫЛО ОШИБОК THREE IS NOT DEFINED -->
-    <script src="https://cdnjs.cloudflare.com"></script>
-    <script src="https://cdn.jsdelivr.net"></script>
+    <!-- THREE.JS -->
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+    </script>
 </head>
 <body>
 
     <div id="gui">
         <div id="player-list">
             <div class="pl-head">Players</div>
-            <div class="pl-row"><span id="my-name-list">Guest</span> <span style="color:lime">100</span></div>
+            <!-- Игрок в списке -->
+            <div class="pl-row">
+                <span id="my-name-list">Guest</span> 
+                <span style="color:lime">100</span>
+            </div>
         </div>
-        <div id="chat-history"></div>
+
+        <div id="chat-history">
+            <!-- Сообщения -->
+        </div>
+        
         <div id="chat-bar">
             <div id="chat-label">Say:</div>
             <input id="chat-input" type="text">
         </div>
     </div>
 
-    <script>
-        // 1. ИНИЦИАЛИЗАЦИЯ
-        const username = localStorage.getItem('ternix_user') || "Player1";
-        const myColor = "#00a2ff";
-        document.getElementById('my-name-list').innerText = username;
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+        // 1. НАСТРОЙКИ ИГРОКА
+        const username = localStorage.getItem('ternix_user') || "Player1";
+        
+        // Генерация цвета ника (Хэш)
+        function getNameColor(name) {
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+            return "#" + "00000".substring(0, 6 - c.length) + c;
+        }
+        const myColor = getNameColor(username);
+        
+        // Обновляем UI
+        const nameLabel = document.getElementById('my-name-list');
+        nameLabel.innerText = username;
+        nameLabel.style.color = myColor;
+
+        // 2. СЦЕНА
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB);
+        scene.fog = new THREE.Fog(0x87CEEB, 50, 150);
+
         const camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-        const sun = new THREE.DirectionalLight(0xffffff, 1);
+        // Свет
+        scene.add(new THREE.AmbientLight(0x888888));
+        const sun = new THREE.DirectionalLight(0xffffff, 1.3);
         sun.position.set(50, 100, 50);
         scene.add(sun);
 
-        // ПОЛ И ПРЕДМЕТЫ
+        // Пол
         const floor = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: 0x4a4a4a }));
         floor.rotation.x = -Math.PI / 2;
         scene.add(floor);
-        scene.add(new THREE.GridHelper(400, 100, 0x000000, 0x555555));
+        scene.add(new THREE.GridHelper(400, 100, 0x666666, 0x555555));
 
-        // Добавляем пару предметов
-        const box = new THREE.Mesh(new THREE.BoxGeometry(5, 5, 5), new THREE.MeshStandardMaterial({color: 0xff0000}));
-        box.position.set(20, 2.5, -20); scene.add(box);
-        const spawnPart = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 0.5), new THREE.MeshStandardMaterial({color: 0x00ff00}));
-        spawnPart.position.set(0, 0.25, 0); scene.add(spawnPart);
-
+        // 3. ИГРОК (Загрузка)
         const player = new THREE.Group();
         scene.add(player);
 
-        // ЗАГРУЗКА
-        const loader = new THREE.GLTFLoader();
-        loader.load('Ternix.Guy.glb', (gltf) => {
-            player.add(gltf.scene);
+        new GLTFLoader().load('Ternix.Guy.glb', (gltf) => {
+            const model = gltf.scene;
+            model.rotation.y = Math.PI; 
+            player.add(model);
         }, undefined, () => {
-            const head = new THREE.Mesh(new THREE.BoxGeometry(1.2,1.2,1.2), new THREE.MeshStandardMaterial({color:0xffff00}));
-            head.position.y = 4; player.add(head);
-            const body = new THREE.Mesh(new THREE.BoxGeometry(2,2,1), new THREE.MeshStandardMaterial({color:0x0000ff}));
-            body.position.y = 2.5; player.add(body);
+            // Fallback Noob
+            const matY = new THREE.MeshStandardMaterial({color:0xffff00});
+            const matB = new THREE.MeshStandardMaterial({color:0x0000ff});
+            const matG = new THREE.MeshStandardMaterial({color:0x00aa00});
+            const head = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), matY); head.position.y=4.5;
+            const torso = new THREE.Mesh(new THREE.BoxGeometry(2,2,1), matB); torso.position.y=3;
+            const lLeg = new THREE.Mesh(new THREE.BoxGeometry(1,2,1), matG); lLeg.position.set(-0.5,1,0);
+            const rLeg = new THREE.Mesh(new THREE.BoxGeometry(1,2,1), matG); rLeg.position.set(0.5,1,0);
+            player.add(head, torso, lLeg, rLeg);
         });
 
-        // ПЕРЕМЕННЫЕ УПРАВЛЕНИЯ
-        let camDist = 20, camYaw = 0, camPitch = 0.5;
-        let isMouseDown = false;
-        const keys = { w:false, a:false, s:false, d:false };
-        let vy = 0, onGround = true;
+        // 4. УПРАВЛЕНИЕ (ИСПРАВЛЕНО ДЛЯ RU КЛАВИАТУР)
+        let camDist = 20;
+        let camYaw = 0, camPitch = 0.5;
+        let isLeftDown = false;
+        let velocityY = 0;
+        let isGrounded = false;
 
-        // СОБЫТИЯ КЛАВИАТУРЫ
-        window.addEventListener('keydown', e => {
-            if(document.activeElement.id === 'chat-input') {
+        // Мышь
+        window.addEventListener('mousedown', e => { if(e.button===0) isLeftDown=true; });
+        window.addEventListener('mouseup', e => { if(e.button===0) isLeftDown=false; });
+        window.addEventListener('mousemove', e => {
+            if(isLeftDown) {
+                camYaw -= e.movementX * 0.005;
+                camPitch -= e.movementY * 0.005;
+                camPitch = Math.max(0.1, Math.min(1.5, camPitch));
+            }
+        });
+        window.addEventListener('wheel', e => {
+            camDist += e.deltaY * 0.05;
+            camDist = Math.max(5, Math.min(50, camDist));
+        });
+
+        // КЛАВИШИ (Важно: используем code, а не key)
+        const keys = { w:false, a:false, s:false, d:false };
+        
+        document.addEventListener('keydown', e => {
+            // Если чат открыт - не двигаемся (кроме Enter)
+            if(document.getElementById('chat-bar').classList.contains('active')) {
                 if(e.code === 'Enter') sendChat();
                 if(e.code === 'Escape') closeChat();
-                return;
+                return; 
             }
+
             if(e.code === 'KeyW') keys.w = true;
             if(e.code === 'KeyS') keys.s = true;
             if(e.code === 'KeyA') keys.a = true;
             if(e.code === 'KeyD') keys.d = true;
-            if(e.code === 'Space' && onGround) { vy = 0.6; onGround = false; }
-            if(e.code === 'Slash') { e.preventDefault(); openChat(); }
+            
+            if(e.code === 'Space' && isGrounded) {
+                velocityY = 0.6; // Прыжок
+                isGrounded = false;
+            }
+            
+            // Открыть чат на Slash (/) или T
+            if(e.code === 'Slash') {
+                e.preventDefault();
+                openChat();
+            }
         });
-
-        window.addEventListener('keyup', e => {
+        
+        document.addEventListener('keyup', e => {
             if(e.code === 'KeyW') keys.w = false;
             if(e.code === 'KeyS') keys.s = false;
             if(e.code === 'KeyA') keys.a = false;
             if(e.code === 'KeyD') keys.d = false;
         });
 
-        window.addEventListener('mousedown', () => isMouseDown = true);
-        window.addEventListener('mouseup', () => isMouseDown = false);
-        window.addEventListener('mousemove', e => {
-            if(isMouseDown) { camYaw -= e.movementX * 0.007; camPitch = Math.max(0.1, Math.min(1.4, camPitch - e.movementY * 0.007)); }
-        });
-
-        // ФУНКЦИИ ЧАТА
-        function openChat() {
-            document.getElementById('chat-bar').style.display = 'flex';
-            document.getElementById('chat-input').focus();
-            keys.w = keys.a = keys.s = keys.d = false; // Стоп при чате
-        }
-        function closeChat() {
-            document.getElementById('chat-bar').style.display = 'none';
-            document.getElementById('chat-input').blur();
-            document.getElementById('chat-input').value = "";
-        }
-        function sendChat() {
-            const val = document.getElementById('chat-input').value.trim();
-            if(val) {
-                const msg = document.createElement('div');
-                msg.className = 'chat-msg';
-                msg.innerHTML = `<span style="color:${myColor}">[${username}]:</span> ${val}`;
-                const hist = document.getElementById('chat-history');
-                hist.appendChild(msg);
-                hist.scrollTop = hist.scrollHeight;
-            }
-            closeChat();
-        }
-
-        // ОСНОВНОЙ ЦИКЛ
+        // 5. ФИЗИКА LOOP
         function animate() {
             requestAnimationFrame(animate);
 
-            // Прыжки
-            vy -= 0.025; player.position.y += vy;
-            if(player.position.y < 0) { player.position.y = 0; vy = 0; onGround = true; }
-
-            // Движение (относительно камеры)
-            const move = new THREE.Vector3();
-            const forward = new THREE.Vector3(Math.sin(camYaw), 0, Math.cos(camYaw));
-            const right = new THREE.Vector3(Math.sin(camYaw - Math.PI/2), 0, Math.cos(camYaw - Math.PI/2));
-
-            if(keys.w) move.sub(forward); if(keys.s) move.add(forward);
-            if(keys.a) move.sub(right); if(keys.d) move.add(right);
-
-            if(move.length() > 0) {
-                move.normalize();
-                player.position.addScaledVector(move, 0.25);
-                // ПЛАВНЫЙ ПОВОРОТ
-                const targetAngle = Math.atan2(move.x, move.z) + Math.PI;
-                let diff = targetAngle - player.rotation.y;
-                while(diff < -Math.PI) diff += Math.PI*2;
-                while(diff > Math.PI) diff -= Math.PI*2;
-                player.rotation.y += diff * 0.15;
+            // Гравитация
+            velocityY -= 0.025;
+            player.position.y += velocityY;
+            if(player.position.y <= 0) {
+                player.position.y = 0;
+                velocityY = 0;
+                isGrounded = true;
             }
 
-            // КАМЕРА
-            camera.position.set(
-                player.position.x + Math.sin(camYaw) * camDist * Math.cos(camPitch),
-                player.position.y + Math.sin(camPitch) * camDist + 3,
-                player.position.z + Math.cos(camYaw) * camDist * Math.cos(camPitch)
-            );
-            camera.lookAt(player.position.x, player.position.y + 3, player.position.z);
+            // Движение
+            const camDir = new THREE.Vector3(Math.sin(camYaw), 0, Math.cos(camYaw)).normalize();
+            const camRight = new THREE.Vector3(Math.sin(camYaw - Math.PI/2), 0, Math.cos(camYaw - Math.PI/2)).normalize();
+            
+            const move = new THREE.Vector3(0,0,0);
+            if(keys.w) move.sub(camDir);
+            if(keys.s) move.add(camDir);
+            if(keys.a) move.sub(camRight);
+            if(keys.d) move.add(camRight);
+
+            if(move.length() > 0) {
+                player.position.addScaledVector(move.normalize(), 0.2);
+                // Поворот модели
+                const targetAngle = Math.atan2(move.x, move.z);
+                let diff = targetAngle - player.rotation.y;
+                while(diff > Math.PI) diff -= Math.PI*2;
+                while(diff < -Math.PI) diff += Math.PI*2;
+                player.rotation.y += diff * 0.2;
+            }
+
+            // Камера
+            const cx = player.position.x + camDist * Math.sin(camYaw) * Math.cos(camPitch);
+            const cy = player.position.y + camDist * Math.sin(camPitch);
+            const cz = player.position.z + camDist * Math.cos(camYaw) * Math.cos(camPitch);
+            camera.position.set(cx, cy, cz);
+            camera.lookAt(player.position.clone().add(new THREE.Vector3(0, 3, 0)));
+
             renderer.render(scene, camera);
         }
         animate();
 
+        // 6. ЛОГИКА ЧАТА
+        const chatBar = document.getElementById('chat-bar');
+        const chatIn = document.getElementById('chat-input');
+        const chatHist = document.getElementById('chat-history');
+
+        function openChat() {
+            chatBar.classList.add('active');
+            chatIn.focus();
+            // Сброс движения при открытии чата
+            keys.w = keys.a = keys.s = keys.d = false;
+        }
+        
+        function closeChat() {
+            chatBar.classList.remove('active');
+            chatIn.blur();
+        }
+
+        function sendChat() {
+            const txt = chatIn.value.trim();
+            if(txt) {
+                const msg = document.createElement('div');
+                msg.className = 'chat-msg';
+                // Цветной ник: [Name]: Message
+                msg.innerHTML = `<span style="color:${myColor}">[${username}]:</span> ${txt}`;
+                chatHist.appendChild(msg);
+                
+                // Авто-скролл
+                chatHist.scrollTop = chatHist.scrollHeight;
+            }
+            chatIn.value = "";
+            closeChat();
+        }
+        
+        // Ресайз
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix();
+            camera.aspect = window.innerWidth/window.innerHeight;
+            camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+
+        // Добавляем системное сообщение при старте
+        setTimeout(() => {
+            const sys = document.createElement('div');
+            sys.className = 'chat-msg';
+            sys.innerHTML = `<span style="color:#aaa">System:</span> Welcome to TerNix! Press '/' to Жchat.`;
+            chatHist.appendChild(sys);
+        }, 500);
     </script>
 </body>
 </html>
