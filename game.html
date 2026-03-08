@@ -2,29 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TerNix Player (RU Fix)</title>
+    <title>TerNix Player</title>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Arial', sans-serif; user-select: none; }
         
-        /* --- GUI --- */
         #gui { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
 
-        /* 1. ЧАТ ИСТОРИЯ */
+        /* Чат-история */
         #chat-history {
             position: absolute; top: 10px; left: 10px; width: 500px; height: 350px;
             display: flex; flex-direction: column; justify-content: flex-start;
-            overflow: hidden;
+            overflow-y: auto; /* чтобы можно было скроллить */
             font-size: 18px; font-weight: bold;
             text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
         }
         .chat-msg { margin-bottom: 4px; color: white; }
 
-        /* 2. СТРОКА ВВОДА (всегда видна) */
+        /* Строка ввода (всегда внизу) */
         #chat-bar {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 32px;
             background: rgba(0, 0, 0, 0.8); border-top: 1px solid #666;
             pointer-events: auto; display: flex; align-items: center;
-            /* всегда видна, но поле заблокировано, пока неактивно */
         }
         #chat-label { color: #00a2ff; font-weight: bold; padding: 0 10px; font-size: 14px; }
         #chat-input {
@@ -36,7 +34,7 @@
             cursor: default;
         }
 
-        /* 3. СПИСОК ИГРОКОВ */
+        /* Список игроков */
         #player-list {
             position: absolute; top: 0; right: 0; width: 180px;
             background: rgba(30, 30, 30, 0.9); border: 1px solid #000; color: white;
@@ -99,63 +97,20 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
+        // Освещение
         scene.add(new THREE.AmbientLight(0x888888));
         const sun = new THREE.DirectionalLight(0xffffff, 1.3);
         sun.position.set(50, 100, 50);
         scene.add(sun);
 
-        const floor = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: 0x4a4a4a }));
-        floor.rotation.x = -Math.PI / 2;
-        scene.add(floor);
+        // --- Зеленый Baseplate ---
+        const baseplateMat = new THREE.MeshStandardMaterial({ color: 0x4CAF50 }); // приятный зелёный
+        const baseplate = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), baseplateMat);
+        baseplate.rotation.x = -Math.PI / 2;
+        scene.add(baseplate);
+
+        // Сетка для ориентира (можно оставить)
         scene.add(new THREE.GridHelper(400, 100, 0x666666, 0x555555));
-
-        // --- Предметы (деревья, камни) ---
-        function createTree(x, z) {
-            const group = new THREE.Group();
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.7, 2), new THREE.MeshStandardMaterial({ color: 0x8B4513 }));
-            trunk.position.y = 1;
-            group.add(trunk);
-            const leafMat = new THREE.MeshStandardMaterial({ color: 0x2E8B57 });
-            const leaf1 = new THREE.Mesh(new THREE.SphereGeometry(0.8), leafMat);
-            leaf1.position.y = 2.5;
-            group.add(leaf1);
-            const leaf2 = new THREE.Mesh(new THREE.SphereGeometry(0.6), leafMat);
-            leaf2.position.set(0.6, 2, 0.6);
-            group.add(leaf2);
-            const leaf3 = new THREE.Mesh(new THREE.SphereGeometry(0.6), leafMat);
-            leaf3.position.set(-0.6, 2, -0.6);
-            group.add(leaf3);
-            group.position.set(x, 0, z);
-            return group;
-        }
-
-        function createRock(x, z) {
-            const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.8), new THREE.MeshStandardMaterial({ color: 0x808080 }));
-            rock.position.set(x, 0.4, z);
-            return rock;
-        }
-
-        function createLamppost(x, z) {
-            const group = new THREE.Group();
-            const poleMat = new THREE.MeshStandardMaterial({ color: 0xAAAAAA });
-            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 3), poleMat);
-            pole.position.y = 1.5;
-            group.add(pole);
-            const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.5), new THREE.MeshStandardMaterial({ color: 0xFFD700, emissive: 0x442200 }));
-            lamp.position.y = 3;
-            group.add(lamp);
-            group.position.set(x, 0, z);
-            return group;
-        }
-
-        scene.add(createTree(10, 10));
-        scene.add(createTree(-8, 12));
-        scene.add(createTree(15, -5));
-        scene.add(createRock(5, 20));
-        scene.add(createRock(-12, -10));
-        scene.add(createRock(20, 5));
-        scene.add(createLamppost(-15, 15));
-        scene.add(createLamppost(20, -20));
 
         // --- Игрок ---
         const player = new THREE.Group();
@@ -166,7 +121,7 @@
             model.rotation.y = Math.PI; 
             player.add(model);
         }, undefined, () => {
-            // Fallback Noob
+            // Fallback Noob (если модель не загрузится)
             const matY = new THREE.MeshStandardMaterial({color:0xffff00});
             const matB = new THREE.MeshStandardMaterial({color:0x0000ff});
             const matG = new THREE.MeshStandardMaterial({color:0x00aa00});
@@ -207,10 +162,11 @@
             if(!chatInput.disabled) {
                 // В активном чате обрабатываем Enter и Escape
                 if(e.code === 'Enter') {
-                    e.preventDefault();
+                    e.preventDefault();  // Очень важно!
                     sendChat();
                 }
                 if(e.code === 'Escape') {
+                    e.preventDefault();
                     deactivateChat();
                 }
                 return; // Другие клавиши не влияют на движение
@@ -282,14 +238,14 @@
         }
         animate();
 
-        // --- Чат (всегда видимый, но активируется по /) ---
+        // --- Чат ---
         const chatInput = document.getElementById('chat-input');
         const chatHist = document.getElementById('chat-history');
 
         function activateChat() {
             chatInput.disabled = false;
             chatInput.focus();
-            // Сброс движения
+            // Сброс движения, чтобы персонаж не продолжал идти после активации чата
             keys.w = keys.a = keys.s = keys.d = false;
         }
         
@@ -305,27 +261,28 @@
                 msg.className = 'chat-msg';
                 msg.innerHTML = `<span style="color:${myColor}">[${username}]:</span> ${txt}`;
                 chatHist.appendChild(msg);
-                chatHist.scrollTop = chatHist.scrollHeight;
+                chatHist.scrollTop = chatHist.scrollHeight; // прокрутка вниз
             }
             chatInput.value = "";
             deactivateChat();
         }
 
-        // Дополнительно: обработчик на самом поле ввода для Enter (на случай, если document не ловит)
+        // Дополнительный обработчик на самом поле ввода для гарантированного перехвата Enter
         chatInput.addEventListener('keydown', (e) => {
             if(e.code === 'Enter') {
-                e.preventDefault();
+                e.preventDefault();  // обязательно!
                 sendChat();
             }
         });
-        
+
+        // Ресайз окна
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth/window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
-        // Системное сообщение удалено
+        // Никаких системных сообщений
     </script>
 </body>
 </html>
