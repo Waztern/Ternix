@@ -66,7 +66,7 @@
             <span style="font-size:18px; font-weight:900;">TERNIX</span>
             <div style="flex:1"></div>
             <div class="stat-bar">
-                User: <b id="disp-name">Guest</b> | Firens: 100 | Nex: 10
+                User: <b id="disp-name">Guest</b> | Firens: <span id="disp-firens">0</span> | Nex: <span id="disp-nex">100</span>
             </div>
         </div>
         <div class="nav">
@@ -86,17 +86,45 @@
     </div>
 
     <script>
+        // Функция обновления отображения валют на главной
+        function updateCurrencies() {
+            const firens = parseInt(localStorage.getItem('ternix_firens') || '0');
+            const nex = parseInt(localStorage.getItem('ternix_nex') || '100');
+            document.getElementById('disp-firens').innerText = firens;
+            document.getElementById('disp-nex').innerText = nex;
+        }
+
+        // Проверка при загрузке: если пользователь уже залогинен, показываем сайт
+        (function checkLogin() {
+            const savedUser = localStorage.getItem('ternix_user');
+            if (savedUser) {
+                document.getElementById('disp-name').innerText = savedUser;
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('site').style.display = 'block';
+                updateCurrencies();
+            }
+        })();
+
         function doLogin() {
             const u = document.getElementById('u-name').value;
             const p = document.getElementById('u-pass').value;
             const err = document.getElementById('err');
 
             if(u.length < 3) { err.innerText = "Username too short"; return; }
-            if(p.length === 0) { err.innerText = "Enter a password!"; return; } // Проверка пароля
+            if(p.length === 0) { err.innerText = "Enter a password!"; return; }
 
-            // Успех
+            // Сохраняем пользователя
             localStorage.setItem('ternix_user', u);
+            // Если валюты ещё не установлены, ставим начальные
+            if (!localStorage.getItem('ternix_firens')) {
+                localStorage.setItem('ternix_firens', '0');
+            }
+            if (!localStorage.getItem('ternix_nex')) {
+                localStorage.setItem('ternix_nex', '100');
+            }
+
             document.getElementById('disp-name').innerText = u;
+            updateCurrencies();
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('site').style.display = 'block';
         }
