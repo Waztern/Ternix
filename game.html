@@ -8,27 +8,28 @@
         
         #gui { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
 
-        /* ===== СТИЛЬ 2014 (ПРЯМОУГОЛЬНЫЙ, БЕЗ СКРУГЛЕНИЙ) ===== */
+        /* ===== СТИЛЬ 2014 (ПРЯМОУГОЛЬНЫЙ, БЕЗ СКРУГЛЕНИЙ, БЕЗ ЖИРНОГО) ===== */
         /* Верхняя панель */
         #top-bar {
             position: absolute; top: 0; left: 0; width: 100%; height: 36px;
-            background: #1e1e1e; color: white; font-size: 14px; font-weight: bold;
+            background: #1e1e1e; color: white; font-size: 13px; font-weight: normal;
             border-bottom: 2px solid #000;
             display: flex; align-items: center; padding: 0 10px;
             pointer-events: auto;
             box-sizing: border-box;
         }
         #exit-btn {
-            background: #d32f2f; color: white; font-weight: bold;
-            padding: 4px 12px; border: 2px solid #8b0000;
+            background: #ffffff; color: #000; font-weight: normal;
+            padding: 4px 12px; border: 2px solid #000;
             cursor: pointer; margin-right: auto;
         }
-        #exit-btn:hover { background: #b71c1c; }
+        #exit-btn:hover { background: #ddd; }
         .currency {
             display: flex; gap: 20px; margin-left: auto;
         }
         .currency span {
             background: #333; padding: 4px 8px; border: 1px solid #777;
+            color: white;
         }
 
         /* Здоровье (зелёная полоса под верхней панелью) */
@@ -45,15 +46,16 @@
         #player-list {
             position: absolute; top: 40px; right: 10px; width: 160px;
             background: #ffd700; border: 2px solid #b8860b;
-            color: #000; font-weight: bold;
+            color: #000; font-weight: normal;
             pointer-events: auto;
         }
         .pl-head {
-            background: #cc8400; padding: 4px; text-align: center; font-size: 14px;
+            background: #cc8400; padding: 4px; text-align: center; font-size: 13px;
             border-bottom: 2px solid #8b5a00;
+            font-weight: normal;
         }
         .pl-row {
-            padding: 4px 8px; font-size: 13px; border-bottom: 1px solid #b8860b;
+            padding: 4px 8px; font-size: 12px; border-bottom: 1px solid #b8860b;
         }
         .pl-row:last-child { border-bottom: none; }
 
@@ -66,30 +68,24 @@
         #chat-history {
             height: 160px; overflow-y: auto; background: #0a1f3a;
             border: 1px solid #000; padding: 4px;
-            color: white; font-weight: bold; font-size: 13px;
+            color: white; font-weight: normal; font-size: 12px;
         }
         .chat-msg { margin: 2px 0; }
         #chat-input-area {
             display: flex; margin-top: 5px;
         }
         #chat-label {
-            background: #0a2f6a; color: white; font-weight: bold;
+            background: #0a2f6a; color: white; font-weight: normal;
             padding: 4px 8px; border: 1px solid #000; border-right: none;
             white-space: nowrap;
+            font-size: 12px;
         }
         #chat-input {
             flex: 1; background: white; border: 1px solid #000;
-            padding: 4px 6px; font-size: 13px; outline: none;
+            padding: 4px 6px; font-size: 12px; outline: none;
             font-family: 'Verdana', sans-serif;
         }
         #chat-input:disabled { background: #ccc; }
-
-        /* Надпись "Make by: Waztern" */
-        #credits {
-            position: absolute; bottom: 10px; right: 10px;
-            background: #333; color: white; font-size: 11px;
-            padding: 2px 6px; border: 1px solid #777;
-        }
     </style>
 
     <script type="importmap">
@@ -118,7 +114,7 @@
 
         <div id="chat-panel">
             <div id="chat-history">
-                <!-- Пример сообщений (потом будут добавляться динамически) -->
+                <!-- Пример сообщений -->
                 <div class="chat-msg"><span style="color:#ffaa00">[waztern]:</span> hi</div>
                 <div class="chat-msg"><span style="color:#00ff00">[Player1]:</span> привет</div>
             </div>
@@ -127,13 +123,17 @@
                 <input id="chat-input" type="text" disabled>
             </div>
         </div>
-
-        <div id="credits">Make by: Waztern</div>
     </div>
 
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+        // --- Проверка регистрации: если нет пользователя, перенаправляем на главную ---
+        const username = localStorage.getItem('ternix_user');
+        if (!username) {
+            window.location.href = 'index.html';
+        }
 
         // --- Валюты из localStorage ---
         function getFirens() { return parseInt(localStorage.getItem('ternix_firens') || '0'); }
@@ -145,7 +145,6 @@
         setNex(getNex());
 
         // --- Имя игрока ---
-        const username = localStorage.getItem('ternix_user') || "Player1";
         function getNameColor(name) {
             let hash = 0;
             for (let i = 0; i < name.length; i++) {
@@ -296,26 +295,16 @@
             if(move.length() > 0) {
                 player.position.addScaledVector(move.normalize(), 0.2);
                 
-                // Поворачиваем персонажа ТОЛЬКО если есть движение вперёд/назад (W/S)
-                // и нет движения влево/вправо (чтобы при чистом A/D не поворачивался)
-                if ((keys.w || keys.s) && !(keys.a || keys.d)) {
+                // Поворачиваем персонажа в сторону движения, если есть компонента вперёд/назад
+                // Включая диагонали
+                if (keys.w || keys.s) {
                     const targetAngle = Math.atan2(move.x, move.z);
                     let diff = targetAngle - player.rotation.y;
                     while(diff > Math.PI) diff -= Math.PI*2;
                     while(diff < -Math.PI) diff += Math.PI*2;
                     player.rotation.y += diff * 0.15;
                 }
-                // Если зажаты и W/S и A/D одновременно, то move будет диагональным,
-                // но персонаж повернётся в сторону диагонали — это тоже допустимо.
-                // Можно оставить как есть или добавить условие.
-                // Для чистоты: если есть и W/S, и A/D, поворачиваем в сторону диагонали.
-                else if (keys.w || keys.s) {
-                    const targetAngle = Math.atan2(move.x, move.z);
-                    let diff = targetAngle - player.rotation.y;
-                    while(diff > Math.PI) diff -= Math.PI*2;
-                    while(diff < -Math.PI) diff += Math.PI*2;
-                    player.rotation.y += diff * 0.15;
-                }
+                // Если только A/D, то не поворачиваем (уже условие выше)
             }
 
             // Камера
@@ -354,7 +343,8 @@
                 chatHist.scrollTop = chatHist.scrollHeight;
             }
             chatInput.value = "";
-            // Чат остаётся активным
+            // После отправки деактивируем чат, чтобы можно было двигаться
+            deactivateChat();
         }
 
         chatInput.addEventListener('keydown', (e) => {
