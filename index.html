@@ -6,38 +6,39 @@
     <style>
         body { margin: 0; font-family: 'Verdana', sans-serif; background-color: #e3e3e3; font-size: 12px; }
         
+        /* Окно входа */
         #login-overlay {
             position: fixed; inset: 0; background: #2d2d2d; z-index: 9999;
             display: flex; justify-content: center; align-items: center;
         }
         .login-box {
-            width: 320px; background: white; border: 1px solid #000;
+            width: 320px; background: white; border: 2px solid #000;
         }
         .lb-header {
-            background: linear-gradient(#0074bd, #0055b3);
-            padding: 8px; color: white; font-weight: bold; border-bottom: 1px solid #003366;
+            background: #0074bd; padding: 8px; color: white; font-weight: bold;
+            border-bottom: 2px solid #003366;
         }
         .lb-body { padding: 20px; background: #f2f2f2; text-align: center; }
         
-        input { display: block; width: 90%; margin: 5px auto; padding: 6px; border: 1px solid #aaa; }
+        input { display: block; width: 90%; margin: 5px auto; padding: 6px; border: 1px solid #000; }
         button {
             margin-top: 10px; padding: 6px 20px; cursor: pointer; font-weight: bold;
-            background: linear-gradient(#66cc00, #449900); color: white; border: 1px solid #005500;
+            background: #66cc00; color: white; border: 1px solid #005500;
         }
         
         #site { display: none; }
         
-        .header { height: 35px; background: #1e1e1e; color: white; display: flex; align-items: center; padding: 0 50px; border-bottom: 1px solid white; }
+        .header { height: 35px; background: #1e1e1e; color: white; display: flex; align-items: center; padding: 0 50px; border-bottom: 2px solid #000; }
         .nav { height: 30px; background: #0074bd; display: flex; align-items: center; padding: 0 50px; color: white; font-weight: bold; border-bottom: 2px solid #003366; gap: 20px; }
         
-        .container { width: 900px; margin: 15px auto; background: white; border: 1px solid #aaa; min-height: 600px; padding: 15px; }
+        .container { width: 900px; margin: 15px auto; background: white; border: 2px solid #000; min-height: 600px; padding: 15px; }
         .stat-bar { float: right; font-size: 11px; }
         
         .game-card {
-            width: 160px; border: 1px solid #ccc; display: inline-block; margin-right: 10px; cursor: pointer;
+            width: 160px; border: 1px solid #000; display: inline-block; margin-right: 10px; cursor: pointer;
         }
         .game-card:hover { border-color: #0074bd; }
-        .thumb { height: 100px; background: #555; }
+        .thumb { height: 100px; background: #555; border-bottom: 1px solid #000; }
         .info { padding: 5px; }
         .g-title { color: #0055b3; font-weight: bold; font-size: 13px; margin-bottom: 5px; }
     </style>
