@@ -2,26 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TerNix — игра</title>
+    <title>TerNix — 2014 Classic</title>
     <style>
         body { margin: 0; overflow: hidden; font-family: 'Verdana', sans-serif; user-select: none; background: #000; }
         
         #gui { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
 
-        /* ===== СТИЛЬ 2014 (ПРЯМОУГОЛЬНЫЙ, БЕЗ СКРУГЛЕНИЙ, БЕЗ ЖИРНОГО) ===== */
+        /* ===== ИНТЕРФЕЙС ROBLOX 2014 ===== */
+        
         /* Верхняя панель */
         #top-bar {
             position: absolute; top: 0; left: 0; width: 100%; height: 36px;
-            background: #1e1e1e; color: white; font-size: 13px; font-weight: normal;
+            background: #1e1e1e; color: white; font-size: 13px;
             border-bottom: 2px solid #000;
             display: flex; align-items: center; padding: 0 10px;
             pointer-events: auto;
             box-sizing: border-box;
         }
         #exit-btn {
-            background: #ffffff; color: #000; font-weight: normal;
+            background: #ffffff; color: #000;
             padding: 4px 12px; border: 2px solid #000;
             cursor: pointer; margin-right: auto;
+            font-size: 13px;
         }
         #exit-btn:hover { background: #ddd; }
         .currency {
@@ -32,7 +34,7 @@
             color: white;
         }
 
-        /* Здоровье (зелёная полоса под верхней панелью) */
+        /* Здоровье — зелёная полоса (как в 2014) */
         #health-container {
             position: absolute; top: 40px; left: 10px; width: 200px; height: 20px;
             background: #222; border: 2px solid #000;
@@ -42,50 +44,51 @@
             height: 100%; width: 100%; background: #2e7d32;
         }
 
-        /* Список игроков (жёлтый, справа) */
+        /* Список игроков — жёлтая таблица справа */
         #player-list {
             position: absolute; top: 40px; right: 10px; width: 160px;
             background: #ffd700; border: 2px solid #b8860b;
-            color: #000; font-weight: normal;
+            color: #000;
             pointer-events: auto;
         }
         .pl-head {
             background: #cc8400; padding: 4px; text-align: center; font-size: 13px;
             border-bottom: 2px solid #8b5a00;
-            font-weight: normal;
         }
         .pl-row {
             padding: 4px 8px; font-size: 12px; border-bottom: 1px solid #b8860b;
         }
         .pl-row:last-child { border-bottom: none; }
 
-        /* Чат (синий, внизу слева) */
+        /* Чат 2014 — тёмно-синий, белый текст */
         #chat-panel {
             position: absolute; bottom: 10px; left: 10px; width: 500px;
-            background: #1e4f8a; border: 2px solid #0a2f6a;
+            background: #0a1a2a; border: 2px solid #0f2f4f;
             padding: 5px; pointer-events: auto;
         }
         #chat-history {
-            height: 160px; overflow-y: auto; background: #0a1f3a;
-            border: 1px solid #000; padding: 4px;
-            color: white; font-weight: normal; font-size: 12px;
+            height: 160px; overflow-y: auto; background: #0f1f2f;
+            border: 1px solid #1f3f5f; padding: 4px;
+            color: white; font-size: 12px;
         }
         .chat-msg { margin: 2px 0; }
         #chat-input-area {
             display: flex; margin-top: 5px;
         }
         #chat-label {
-            background: #0a2f6a; color: white; font-weight: normal;
-            padding: 4px 8px; border: 1px solid #000; border-right: none;
-            white-space: nowrap;
-            font-size: 12px;
+            background: #1f3f5f; color: white;
+            padding: 4px 8px; border: 1px solid #2f4f6f; border-right: none;
+            white-space: nowrap; font-size: 12px;
         }
         #chat-input {
-            flex: 1; background: white; border: 1px solid #000;
+            flex: 1; background: white; border: 1px solid #2f4f6f;
             padding: 4px 6px; font-size: 12px; outline: none;
             font-family: 'Verdana', sans-serif;
         }
         #chat-input:disabled { background: #ccc; }
+
+        /* Сообщения в чате — пример */
+        .chat-msg span { color: #ffaa00; } /* Имя */
     </style>
 
     <script type="importmap">
@@ -129,13 +132,13 @@
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-        // --- Проверка регистрации: если нет пользователя, перенаправляем на главную ---
+        // --- Проверка регистрации ---
         const username = localStorage.getItem('ternix_user');
         if (!username) {
             window.location.href = 'index.html';
         }
 
-        // --- Валюты из localStorage ---
+        // --- Валюты ---
         function getFirens() { return parseInt(localStorage.getItem('ternix_firens') || '0'); }
         function getNex() { return parseInt(localStorage.getItem('ternix_nex') || '100'); }
         function setFirens(value) { localStorage.setItem('ternix_firens', value); document.getElementById('firens').innerText = `Firens: ${value}`; }
@@ -182,20 +185,16 @@
         baseplate.rotation.x = -Math.PI / 2;
         scene.add(baseplate);
 
-        // Сетка для ориентира (можно оставить)
-        scene.add(new THREE.GridHelper(400, 100, 0x666666, 0x555555));
-
         // --- Игрок (модель) ---
         const player = new THREE.Group();
         scene.add(player);
 
         new GLTFLoader().load('Ternix.Guy.glb', (gltf) => {
             const model = gltf.scene;
-            // Подстройка начального поворота (зависит от модели)
-            model.rotation.y = Math.PI; // если модель смотрит в сторону -Z
+            model.rotation.y = Math.PI;
             player.add(model);
         }, undefined, () => {
-            // Заглушка-кубик
+            // Заглушка
             const matY = new THREE.MeshStandardMaterial({color:0xffff00});
             const matB = new THREE.MeshStandardMaterial({color:0x0000ff});
             const matG = new THREE.MeshStandardMaterial({color:0x00aa00});
@@ -206,7 +205,7 @@
             player.add(head, torso, lLeg, rLeg);
         });
 
-        // --- Управление: W/S поворачивают, A/D только движение вбок ---
+        // --- УПРАВЛЕНИЕ: W/S — вперёд/назад (с поворотом), A/D — влево/вправо (без поворота) ---
         let camDist = 20;
         let camYaw = 0, camPitch = 0.5;
         let isLeftDown = false;
@@ -232,7 +231,6 @@
         document.addEventListener('keydown', e => {
             const chatInput = document.getElementById('chat-input');
             
-            // Если чат активен
             if(!chatInput.disabled) {
                 if(e.code === 'Enter') {
                     e.preventDefault();
@@ -272,7 +270,6 @@
         function animate() {
             requestAnimationFrame(animate);
 
-            // Гравитация
             velocityY -= 0.025;
             player.position.y += velocityY;
             if(player.position.y <= 0) {
@@ -281,7 +278,6 @@
                 isGrounded = true;
             }
 
-            // Направления относительно камеры
             const camDir = new THREE.Vector3(Math.sin(camYaw), 0, Math.cos(camYaw)).normalize();
             const camRight = new THREE.Vector3(Math.sin(camYaw - Math.PI/2), 0, Math.cos(camYaw - Math.PI/2)).normalize();
             
@@ -291,12 +287,11 @@
             if(keys.a) move.sub(camRight);
             if(keys.d) move.add(camRight);
 
-            // Если есть движение, применяем его
             if(move.length() > 0) {
                 player.position.addScaledVector(move.normalize(), 0.2);
                 
-                // Поворачиваем персонажа в сторону движения, если есть компонента вперёд/назад
-                // Включая диагонали
+                // Поворачиваем персонажа ТОЛЬКО если есть движение вперёд/назад (W/S)
+                // A/D — чистое смещение вбок, без поворота
                 if (keys.w || keys.s) {
                     const targetAngle = Math.atan2(move.x, move.z);
                     let diff = targetAngle - player.rotation.y;
@@ -304,10 +299,8 @@
                     while(diff < -Math.PI) diff += Math.PI*2;
                     player.rotation.y += diff * 0.15;
                 }
-                // Если только A/D, то не поворачиваем (уже условие выше)
             }
 
-            // Камера
             const cx = player.position.x + camDist * Math.sin(camYaw) * Math.cos(camPitch);
             const cy = player.position.y + camDist * Math.sin(camPitch);
             const cz = player.position.z + camDist * Math.cos(camYaw) * Math.cos(camPitch);
@@ -343,7 +336,7 @@
                 chatHist.scrollTop = chatHist.scrollHeight;
             }
             chatInput.value = "";
-            // После отправки деактивируем чат, чтобы можно было двигаться
+            // После отправки — деактивируем чат, чтобы можно было двигаться
             deactivateChat();
         }
 
