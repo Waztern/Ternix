@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TerNix — 2014 Classic</title>
+    <title>TerNix — игра</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Verdana', 'Arial', sans-serif; user-select: none; }
+        body { margin: 0; overflow: hidden; font-family: 'Verdana', sans-serif; user-select: none; background: #000; }
         
         #gui { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
 
-        /* ========== СТИЛЬ ROBLOX 2014 (БЕЗ ЗАКРУГЛЕНИЙ) ========== */
-        /* Верхняя полоса */
+        /* ===== СТИЛЬ 2014 (ПРЯМОУГОЛЬНЫЙ, БЕЗ СКРУГЛЕНИЙ) ===== */
+        /* Верхняя панель */
         #top-bar {
             position: absolute; top: 0; left: 0; width: 100%; height: 36px;
-            background: #1e1e1e; color: white; font-weight: bold; font-size: 14px;
+            background: #1e1e1e; color: white; font-size: 14px; font-weight: bold;
             border-bottom: 2px solid #000;
             display: flex; align-items: center; padding: 0 10px;
             pointer-events: auto;
@@ -31,7 +31,7 @@
             background: #333; padding: 4px 8px; border: 1px solid #777;
         }
 
-        /* Зелёная полоса здоровья (под верхней полосой) */
+        /* Здоровье (зелёная полоса под верхней панелью) */
         #health-container {
             position: absolute; top: 40px; left: 10px; width: 200px; height: 20px;
             background: #222; border: 2px solid #000;
@@ -41,7 +41,7 @@
             height: 100%; width: 100%; background: #2e7d32;
         }
 
-        /* Жёлтая таблица игроков (справа) */
+        /* Список игроков (жёлтый, справа) */
         #player-list {
             position: absolute; top: 40px; right: 10px; width: 160px;
             background: #ffd700; border: 2px solid #b8860b;
@@ -57,7 +57,7 @@
         }
         .pl-row:last-child { border-bottom: none; }
 
-        /* Синяя панель чата (внизу слева) */
+        /* Чат (синий, внизу слева) */
         #chat-panel {
             position: absolute; bottom: 10px; left: 10px; width: 500px;
             background: #1e4f8a; border: 2px solid #0a2f6a;
@@ -99,7 +99,6 @@
 <body>
 
     <div id="gui">
-        <!-- Верхняя полоса -->
         <div id="top-bar">
             <div id="exit-btn">Exit</div>
             <div class="currency">
@@ -108,31 +107,27 @@
             </div>
         </div>
 
-        <!-- Здоровье -->
         <div id="health-container">
             <div id="health-bar"></div>
         </div>
 
-        <!-- Список игроков -->
         <div id="player-list">
             <div class="pl-head">Players</div>
             <div class="pl-row" id="my-name-row">Загрузка...</div>
         </div>
 
-        <!-- Чат -->
         <div id="chat-panel">
             <div id="chat-history">
-                <!-- Пример сообщений, как на схеме -->
+                <!-- Пример сообщений (потом будут добавляться динамически) -->
                 <div class="chat-msg"><span style="color:#ffaa00">[waztern]:</span> hi</div>
                 <div class="chat-msg"><span style="color:#00ff00">[Player1]:</span> привет</div>
             </div>
             <div id="chat-input-area">
-                <div id="chat-label">Click here or press "/" key</div>
+                <div id="chat-label">To chat click here or press "/" key</div>
                 <input id="chat-input" type="text" disabled>
             </div>
         </div>
 
-        <!-- Надпись -->
         <div id="credits">Make by: Waztern</div>
     </div>
 
@@ -188,7 +183,7 @@
         baseplate.rotation.x = -Math.PI / 2;
         scene.add(baseplate);
 
-        // Сетка (можно убрать, но для ориентира оставим)
+        // Сетка для ориентира (можно оставить)
         scene.add(new THREE.GridHelper(400, 100, 0x666666, 0x555555));
 
         // --- Игрок (модель) ---
@@ -197,7 +192,8 @@
 
         new GLTFLoader().load('Ternix.Guy.glb', (gltf) => {
             const model = gltf.scene;
-            model.rotation.y = Math.PI; // подстройка
+            // Подстройка начального поворота (зависит от модели)
+            model.rotation.y = Math.PI; // если модель смотрит в сторону -Z
             player.add(model);
         }, undefined, () => {
             // Заглушка-кубик
@@ -211,7 +207,7 @@
             player.add(head, torso, lLeg, rLeg);
         });
 
-        // --- Управление (WASD относительно камеры, с поворотом персонажа) ---
+        // --- Управление: W/S поворачивают, A/D только движение вбок ---
         let camDist = 20;
         let camYaw = 0, camPitch = 0.5;
         let isLeftDown = false;
@@ -250,7 +246,7 @@
                 return;
             }
 
-            // Движение: W вперёд (+camDir), S назад (-camDir), A влево (-camRight), D вправо (+camRight)
+            // Движение
             if(e.code === 'KeyW') keys.w = true;
             if(e.code === 'KeyS') keys.s = true;
             if(e.code === 'KeyA') keys.a = true;
@@ -286,24 +282,40 @@
                 isGrounded = true;
             }
 
-            // Векторы относительно камеры
+            // Направления относительно камеры
             const camDir = new THREE.Vector3(Math.sin(camYaw), 0, Math.cos(camYaw)).normalize();
             const camRight = new THREE.Vector3(Math.sin(camYaw - Math.PI/2), 0, Math.cos(camYaw - Math.PI/2)).normalize();
             
             const move = new THREE.Vector3(0,0,0);
-            if(keys.w) move.add(camDir);      // вперёд
-            if(keys.s) move.sub(camDir);      // назад
-            if(keys.a) move.sub(camRight);    // влево
-            if(keys.d) move.add(camRight);     // вправо
+            if(keys.w) move.add(camDir);
+            if(keys.s) move.sub(camDir);
+            if(keys.a) move.sub(camRight);
+            if(keys.d) move.add(camRight);
 
+            // Если есть движение, применяем его
             if(move.length() > 0) {
                 player.position.addScaledVector(move.normalize(), 0.2);
-                // Поворачиваем персонажа в сторону движения
-                const targetAngle = Math.atan2(move.x, move.z);
-                let diff = targetAngle - player.rotation.y;
-                while(diff > Math.PI) diff -= Math.PI*2;
-                while(diff < -Math.PI) diff += Math.PI*2;
-                player.rotation.y += diff * 0.15;
+                
+                // Поворачиваем персонажа ТОЛЬКО если есть движение вперёд/назад (W/S)
+                // и нет движения влево/вправо (чтобы при чистом A/D не поворачивался)
+                if ((keys.w || keys.s) && !(keys.a || keys.d)) {
+                    const targetAngle = Math.atan2(move.x, move.z);
+                    let diff = targetAngle - player.rotation.y;
+                    while(diff > Math.PI) diff -= Math.PI*2;
+                    while(diff < -Math.PI) diff += Math.PI*2;
+                    player.rotation.y += diff * 0.15;
+                }
+                // Если зажаты и W/S и A/D одновременно, то move будет диагональным,
+                // но персонаж повернётся в сторону диагонали — это тоже допустимо.
+                // Можно оставить как есть или добавить условие.
+                // Для чистоты: если есть и W/S, и A/D, поворачиваем в сторону диагонали.
+                else if (keys.w || keys.s) {
+                    const targetAngle = Math.atan2(move.x, move.z);
+                    let diff = targetAngle - player.rotation.y;
+                    while(diff > Math.PI) diff -= Math.PI*2;
+                    while(diff < -Math.PI) diff += Math.PI*2;
+                    player.rotation.y += diff * 0.15;
+                }
             }
 
             // Камера
@@ -342,7 +354,7 @@
                 chatHist.scrollTop = chatHist.scrollHeight;
             }
             chatInput.value = "";
-            // Оставляем активным
+            // Чат остаётся активным
         }
 
         chatInput.addEventListener('keydown', (e) => {
