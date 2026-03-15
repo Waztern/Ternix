@@ -1,125 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>TerNix - Home (2014)</title>
-    <style>
-        body { margin: 0; font-family: 'Verdana', sans-serif; background-color: #e3e3e3; font-size: 12px; }
-        
-        /* Окно входа */
-        #login-overlay {
-            position: fixed; inset: 0; background: #2d2d2d; z-index: 9999;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .login-box {
-            width: 320px; background: white; border: 2px solid #000;
-        }
-        .lb-header {
-            background: #0074bd; padding: 8px; color: white; font-weight: bold;
-            border-bottom: 2px solid #003366;
-        }
-        .lb-body { padding: 20px; background: #f2f2f2; text-align: center; }
-        
-        input { display: block; width: 90%; margin: 5px auto; padding: 6px; border: 1px solid #000; }
-        button {
-            margin-top: 10px; padding: 6px 20px; cursor: pointer; font-weight: bold;
-            background: #66cc00; color: white; border: 1px solid #005500;
-        }
-        
-        #site { display: none; }
-        
-        .header { height: 35px; background: #1e1e1e; color: white; display: flex; align-items: center; padding: 0 50px; border-bottom: 2px solid #000; }
-        .nav { height: 30px; background: #0074bd; display: flex; align-items: center; padding: 0 50px; color: white; font-weight: bold; border-bottom: 2px solid #003366; gap: 20px; }
-        
-        .container { width: 900px; margin: 15px auto; background: white; border: 2px solid #000; min-height: 600px; padding: 15px; }
-        .stat-bar { float: right; font-size: 11px; }
-        
-        .game-card {
-            width: 160px; border: 1px solid #000; display: inline-block; margin-right: 10px; cursor: pointer;
-        }
-        .game-card:hover { border-color: #0074bd; }
-        .thumb { height: 100px; background: #555; border-bottom: 1px solid #000; }
-        .info { padding: 5px; }
-        .g-title { color: #0055b3; font-weight: bold; font-size: 13px; margin-bottom: 5px; }
-    </style>
-</head>
-<body>
+function doLogin() {
+    const u = document.getElementById('u-name').value;
+    const p = document.getElementById('u-pass').value;
+    const err = document.getElementById('err');
 
-    <div id="login-overlay">
-        <div class="login-box">
-            <div class="lb-header">Login to TerNix</div>
-            <div class="lb-body">
-                <input id="u-name" placeholder="Username">
-                <input id="u-pass" type="password" placeholder="Password">
-                <button onclick="doLogin()">Login</button>
-                <div id="err" style="color:red; margin-top:5px; font-size:10px;"></div>
-            </div>
-        </div>
-    </div>
+    // Проверка ника: от 3 до 20 символов, только английские буквы и цифры
+    const nameRegex = /^[a-zA-Z0-9]{3,20}$/;
+    // Проверка пароля: минимум 8 символов
+    const passRegex = /^.{8,}$/;
 
-    <div id="site">
-        <div class="header">
-            <span style="font-size:18px; font-weight:900;">TERNIX</span>
-            <div style="flex:1"></div>
-            <div class="stat-bar">
-                User: <b id="disp-name">Guest</b> | Firens: <span id="disp-firens">0</span> | Nex: <span id="disp-nex">100</span>
-            </div>
-        </div>
-        <div class="nav">
-            <div>Games</div> <div>Catalog</div> <div>Develop</div> <div>Forum</div>
-        </div>
-        <div class="container">
-            <h3>Games</h3>
-            <div class="game-card" onclick="window.location.href='game.html'">
-                <div class="thumb"></div>
-                <div class="info">
-                    <div class="g-title">TerNix Place</div>
-                    <div style="font-size:10px; color:#666;">By Admin</div>
-                    <div style="font-size:10px; color:green;">12 Playing</div>
-                </div>
-            </div>
-        </div>
-    </div>
+    if(!nameRegex.test(u)) { 
+        err.innerText = "Username: 3-20 chars, English & numbers only!"; 
+        return; 
+    }
+    if(!passRegex.test(p)) { 
+        err.innerText = "Password: minimum 8 characters!"; 
+        return; 
+    }
 
-    <script>
-        function updateCurrencies() {
-            const firens = parseInt(localStorage.getItem('ternix_firens') || '0');
-            const nex = parseInt(localStorage.getItem('ternix_nex') || '100');
-            document.getElementById('disp-firens').innerText = firens;
-            document.getElementById('disp-nex').innerText = nex;
-        }
+    localStorage.setItem('ternix_user', u);
+    localStorage.setItem('ternix_firens', '0');
+    localStorage.setItem('ternix_nex', '100');
 
-        (function checkLogin() {
-            const savedUser = localStorage.getItem('ternix_user');
-            if (savedUser) {
-                document.getElementById('disp-name').innerText = savedUser;
-                document.getElementById('login-overlay').style.display = 'none';
-                document.getElementById('site').style.display = 'block';
-                updateCurrencies();
-            }
-        })();
-
-        function doLogin() {
-            const u = document.getElementById('u-name').value;
-            const p = document.getElementById('u-pass').value;
-            const err = document.getElementById('err');
-
-            if(u.length < 3) { err.innerText = "Username too short"; return; }
-            if(p.length === 0) { err.innerText = "Enter a password!"; return; }
-
-            localStorage.setItem('ternix_user', u);
-            if (!localStorage.getItem('ternix_firens')) {
-                localStorage.setItem('ternix_firens', '0');
-            }
-            if (!localStorage.getItem('ternix_nex')) {
-                localStorage.setItem('ternix_nex', '100');
-            }
-
-            document.getElementById('disp-name').innerText = u;
-            updateCurrencies();
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('site').style.display = 'block';
-        }
-    </script>
-</body>
-</html>
+    window.location.reload(); // Перезагрузка для входа
+}
